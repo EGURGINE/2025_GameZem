@@ -1,0 +1,373 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class GameManager : Singleton<GameManager>
+{
+    [Header("Game Settings")]
+    public int maxLives = 3;
+    public float cutSpeed = 2f;
+    public float cutSpacing = 3f;
+    public float successThreshold = 0.5f; // 컷 라인 근처 성공 범위
+    public float touchWindowTime = 1f; // 터치 가능 시간 (초)
+    
+    [Header("Date Score Settings")]
+    public float monthIncreaseInterval = 5f; // 몇 초마다 1개월 증가
+    private System.DateTime startDate = new System.DateTime(2006, 9, 8);
+    private System.DateTime endDate = new System.DateTime(2020, 7, 27);
+    private System.DateTime currentDate;
+    private float timeSinceLastIncrease = 0f;
+    private float playTIme = 0;
+    
+    [Header("Game Objects")]
+    public GameObject cutPrefab;
+    public Transform cutContainer;
+    public Transform cutLine;
+    public CutSpawner cutSpawner; // CutSpawner 참조
+    
+    // Game State
+    private int currentLives;
+    private int score;
+    private bool isGameActive = true;
+    private bool isGameCleared = false;
+    
+    // Events
+    public System.Action<System.DateTime> OnDateChanged; // 날짜 변경 이벤트
+    public System.Action<int> OnLivesChanged;
+    public System.Action OnGameOver;
+    public System.Action OnGameCleared; // 게임 클리어 이벤트
+    public System.Action OnComboAdded;
+
+
+    // Save Data
+    private const string SAVE_KEY = "GameRecords";
+    private const int MAX_RECORDS = 5; // 최대 저장 개수
+    public List<SaveData> saveDataList = new List<SaveData>();
+    
+    protected override void Awake()
+    {
+        base.Awake();
+        LoadRecords();
+        InitializeGame();
+    }
+    
+    private void Start()
+    {
+        StartGame();
+    }
+    
+    private void Update()
+    {
+        if (isGameActive && !isGameCleared)
+        {
+            UpdateDateProgress();
+        }
+    }
+    
+    private void InitializeGame()
+    {
+        currentLives = maxLives;
+        score = 0;
+        currentDate = startDate;
+        timeSinceLastIncrease = 0f;
+        isGameActive = true;
+        isGameCleared = false;
+        
+        // 이벤트로 초기 상태 알림
+        OnDateChanged?.Invoke(currentDate);
+        OnLivesChanged?.Invoke(currentLives);
+    }
+    
+    private void StartGame()
+    {
+        // CutSpawner를 사용하여 컷 생성 시작
+        if (cutSpawner != null)
+        {
+            cutSpawner.ResumeSpawning();
+            playTIme = 0;
+        }
+        else
+        {
+            Debug.LogWarning("CutSpawner not assigned! Please assign CutSpawner in GameManager.");
+        }
+    }
+    
+    private void UpdateDateProgress()
+    {
+        timeSinceLastIncrease += Time.deltaTime;
+
+        playTIme += Time.deltaTime;
+        
+        if (timeSinceLastIncrease >= monthIncreaseInterval)
+        {
+            timeSinceLastIncrease = 0f;
+            AddMonth();
+        }
+    }
+    
+    private void AddMonth()
+    {
+        // 1개월 추가
+        System.DateTime newDate = currentDate.AddMonths(1);
+        
+        // 종료일을 넘지 않도록 체크
+        if (newDate > endDate)
+        {
+            currentDate = endDate;
+            OnDateChanged?.Invoke(currentDate);
+            GameCleared();
+        }
+        else
+        {
+            currentDate = newDate;
+            OnDateChanged?.Invoke(currentDate);
+            Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM. dd"));
+        }
+    }
+    
+    // CutSpawner에서 호출할 공개 메서드
+    public void OnCutSuccessCallback()
+    {
+        if (!isGameActive || isGameCleared) return;
+        
+        // 성공 시 점수는 증가하지 않음 (생존만 중요)
+        OnComboAdded?.Invoke();
+        Debug.Log("Cut Success!");
+        
+        // 성공 효과음 재생
+        // if (SoundManager.Instance != null)
+        // {
+        //     SoundManager.Instance.PlayCutSuccessSound();
+        // }
+    }
+    
+    public void OnCutMissCallback()
+    {
+        if (!isGameActive) return;
+        
+        LoseLife();
+        Debug.Log("Cut Miss! Lives: " + currentLives);
+        
+        // 실패 효과음 재생
+        // if (SoundManager.Instance != null)
+        // {
+        //     SoundManager.Instance.PlayCutMissSound();
+        // }
+    }
+    
+    
+    private void LoseLife()
+    {
+        currentLives--;
+        OnLivesChanged?.Invoke(currentLives);
+        
+        if (currentLives <= 0)
+        {
+            GameOver();
+        }
+    }
+    
+    private void GameOver()
+    {
+        isGameActive = false;
+        
+        // CutSpawner 정지
+        if (cutSpawner != null)
+        {
+            cutSpawner.StopSpawning();
+        }
+        
+        OnGameOver?.Invoke();
+
+        // 게임 기록 저장
+        SaveData saveData = new SaveData
+        {
+            date = currentDate.ToString("yyyy. MM. dd"),
+            time = playTIme,
+            isCleared = false
+        };
+        saveDataList.Add(saveData);
+        SaveRecords();
+        
+        // 게임 오버 효과음 재생
+        // if (SoundManager.Instance != null)
+        // {
+        //     SoundManager.Instance.PlayGameOverSound();
+        // }
+    }
+    
+    private void GameCleared()
+    {
+        isGameActive = false;
+        isGameCleared = true;
+        
+        // CutSpawner 정지
+        if (cutSpawner != null)
+        {
+            cutSpawner.StopSpawning();
+        }
+        
+        OnGameCleared?.Invoke();
+        
+        // 게임 클리어 기록 저장
+        SaveData saveData = new SaveData
+        {
+            date = currentDate.ToString("yyyy. MM. dd"),
+            time = (int)playTIme,
+            isCleared = true
+        };
+        saveDataList.Add(saveData);
+        SaveRecords();
+        
+        Debug.Log("Game Cleared! Reached: " + endDate.ToString("yyyy. MM. dd"));
+        
+        // 게임 클리어 효과음 재생
+        // if (SoundManager.Instance != null)
+        // {
+        //     SoundManager.Instance.PlayGameClearedSound();
+        // }
+    }
+    
+    public int GetScore()
+    {
+        return score;
+    }
+    
+    public int GetCurrentLives()
+    {
+        return currentLives;
+    }
+    
+    public System.DateTime GetCurrentDate()
+    {
+        return currentDate;
+    }
+    
+    public System.DateTime GetEndDate()
+    {
+        return endDate;
+    }
+    
+    public bool IsGameActive()
+    {
+        return isGameActive;
+    }
+    
+    public void RestartGame()
+    {
+        // 기존 컷들 제거
+        if (cutSpawner != null)
+        {
+            cutSpawner.ClearAllCuts();
+        }
+        
+        // 게임 재시작
+        InitializeGame();
+        StartGame();
+    }
+    
+    // 기록 저장
+    private void SaveRecords()
+    {
+        // 시간 기준으로 내림차순 정렬 (오래 버틴 순)
+        saveDataList.Sort((a, b) => b.time.CompareTo(a.time));
+        
+        // 상위 5개만 유지
+        if (saveDataList.Count > MAX_RECORDS)
+        {
+            saveDataList.RemoveRange(MAX_RECORDS, saveDataList.Count - MAX_RECORDS);
+        }
+        
+        SaveDataList dataList = new SaveDataList();
+        dataList.records = saveDataList;
+        
+        string json = JsonUtility.ToJson(dataList, true);
+        PlayerPrefs.SetString(SAVE_KEY, json);
+        PlayerPrefs.Save();
+        
+        Debug.Log("Records saved: " + saveDataList.Count + " records (top " + MAX_RECORDS + ")");
+    }
+    
+    // 기록 불러오기
+    private void LoadRecords()
+    {
+        if (PlayerPrefs.HasKey(SAVE_KEY))
+        {
+            string json = PlayerPrefs.GetString(SAVE_KEY);
+            SaveDataList dataList = JsonUtility.FromJson<SaveDataList>(json);
+            if (dataList != null && dataList.records != null)
+            {
+                saveDataList = dataList.records;
+                Debug.Log("Records loaded: " + saveDataList.Count + " records");
+            }
+        }
+        else
+        {
+            Debug.Log("No saved records found");
+        }
+    }
+    
+    // 기록 가져오기 (시간 순으로 정렬)
+    public List<SaveData> GetRecords()
+    {
+        // 시간 기준으로 내림차순 정렬하여 반환
+        List<SaveData> sortedRecords = new List<SaveData>(saveDataList);
+        sortedRecords.Sort((a, b) => b.time.CompareTo(a.time));
+        return sortedRecords;
+    }
+    
+    // 기록 삭제
+    public void ClearRecords()
+    {
+        saveDataList.Clear();
+        PlayerPrefs.DeleteKey(SAVE_KEY);
+        PlayerPrefs.Save();
+        Debug.Log("All records cleared");
+    }
+    
+    // 최고 기록 가져오기 (가장 오래 버틴 기록)
+    public SaveData GetBestRecord()
+    {
+        if (saveDataList == null || saveDataList.Count == 0)
+            return null;
+        
+        SaveData bestRecord = saveDataList[0];
+        foreach (SaveData record in saveDataList)
+        {
+            if (record.time > bestRecord.time)
+            {
+                bestRecord = record;
+            }
+        }
+        
+        return bestRecord;
+    }
+    
+    // 클리어 기록만 가져오기
+    public List<SaveData> GetClearedRecords()
+    {
+        List<SaveData> clearedRecords = new List<SaveData>();
+        foreach (SaveData record in saveDataList)
+        {
+            if (record.isCleared)
+            {
+                clearedRecords.Add(record);
+            }
+        }
+        return clearedRecords;
+    }
+}
+
+[System.Serializable]
+public class SaveData
+{
+    public string date;
+    public float time;
+    public bool isCleared;
+}
+
+[System.Serializable]
+public class SaveDataList
+{
+    public List<SaveData> records = new List<SaveData>();
+}
