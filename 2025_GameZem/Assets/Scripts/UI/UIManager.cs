@@ -244,7 +244,7 @@ public class UIManager : Singleton<UIManager>
     {
         if (dateText != null)
         {
-            dateText.text = date.ToString("yyyy. MM. dd");
+            dateText.text = date.ToString("yyyy. MM");
         }
     }
     
@@ -375,7 +375,7 @@ public class UIManager : Singleton<UIManager>
             if (finalScoreText != null)
             {
                 System.DateTime finalDate = GameManager.Instance.GetCurrentDate();
-                finalScoreText.text = $"{finalDate:yyyy. MM. dd}";
+                finalScoreText.text = $"{finalDate:yyyy. MM}";
             }
             
             // 최고 기록 표시

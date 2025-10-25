@@ -126,7 +126,7 @@ public class GameManager : Singleton<GameManager>
             currentDate = newDate;
             SafeInvokeEvent(() => OnDateChanged?.Invoke(currentDate), "OnDateChanged");
             UpdateProgress();
-            Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM. dd"));
+            Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM"));
         }
     }
     

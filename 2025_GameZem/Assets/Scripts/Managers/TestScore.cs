@@ -18,7 +18,7 @@ public class TestScore : MonoBehaviour
         public GameRecord(float time, bool cleared = true)
         {
             timeInSeconds = time;
-            dateTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            dateTime = System.DateTime.Now.ToString("yyyy-MM");
             isCleared = cleared;
         }
         
