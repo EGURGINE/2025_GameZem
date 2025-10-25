@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1245219277267046525}
   - component: {fileID: 810514440519047957}
   - component: {fileID: 5682700565485848784}
+  - component: {fileID: 8717843923511170955}
   m_Layer: 5
   m_Name: UI Randomnew
   m_TagString: Untagged
@@ -128,6 +129,26 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4e5e13bdb15b529439d03041aed115b3, type: 2}
   skeletonGraphic: {fileID: 810514440519047957}
   pickOnceOnStart: 1
+--- !u!114 &8717843923511170955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5186657199718178722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38235e61f7b3b304d8e6cbbdc8a702a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleTime: 2
+  playOnStart: 1
+  idleAnim: idle
+  disappearAnim: disappear
+  destroyAfterDisappear: 1
+  spawnerToStop: {fileID: 0}
+  spawnAreas:
+  - {fileID: 5729707736080921715}
 --- !u!1 &6474442212249149824
 GameObject:
   m_ObjectHideFlags: 0
