@@ -86,7 +86,7 @@ public class TimedUIRandomSpawner : MonoBehaviour
         if (!click) click = _current.gameObject.AddComponent<UIItemClickToHide>();
 
         // 클릭 이벤트에 “현재 인스턴스 비우기” 연결
-        click.onClicked.AddListener(() => { _current = null; });
+        click.onHidden.AddListener(() => { _current = null; });
 
         // 랜덤 위치 계산 (spawnArea의 anchored 공간 기준)
         Rect r = spawnArea.rect;

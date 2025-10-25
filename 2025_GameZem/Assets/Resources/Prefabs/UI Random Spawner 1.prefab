@@ -44,7 +44,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4839848188006033750}
-  - component: {fileID: 7268679512620074105}
   - component: {fileID: 8691447094900547337}
   - component: {fileID: 8876244658687819949}
   - component: {fileID: 1572887359668931740}
@@ -76,26 +75,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7268679512620074105
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5241086255014812743}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cadd99b5b9a97924f833fb9521c6719e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnArea: {fileID: 8015186883093990184}
-  itemPrefab: {fileID: 8287025753688430444, guid: 684465320f3cb484e854a8e62f50b1a5, type: 3}
-  firstDelay: 0
-  respawnDelay: 0
-  loop: 0
-  overrideSize: {x: 0, y: 0}
-  padding: {x: 20, y: 20}
-  parentOverride: {fileID: 0}
 --- !u!222 &8691447094900547337
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -202,4 +181,6 @@ MonoBehaviour:
   playOnStart: 1
   idleAnim: idle
   disappearAnim: disappear
+  destroyAfterDisappear: 1
+  spawnerToStop: {fileID: 0}
   spawnAreas: []

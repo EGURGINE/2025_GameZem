@@ -9,11 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9098998608247272596}
-  - component: {fileID: 187797566867811994}
   - component: {fileID: 1245219277267046525}
   - component: {fileID: 810514440519047957}
   - component: {fileID: 5682700565485848784}
-  - component: {fileID: 3264615117109753449}
   m_Layer: 5
   m_Name: UI Randomnew
   m_TagString: Untagged
@@ -41,26 +39,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &187797566867811994
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5186657199718178722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cadd99b5b9a97924f833fb9521c6719e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnArea: {fileID: 5729707736080921715}
-  itemPrefab: {fileID: 8287025753688430444, guid: 684465320f3cb484e854a8e62f50b1a5, type: 3}
-  firstDelay: 0
-  respawnDelay: 0
-  loop: 0
-  overrideSize: {x: 0, y: 0}
-  padding: {x: 20, y: 20}
-  parentOverride: {fileID: 0}
 --- !u!222 &1245219277267046525
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -131,7 +109,7 @@ MonoBehaviour:
       calculateTangents: 0
       immutableTriangles: 0
   updateTiming: 1
-  unscaledTime: 0
+  unscaledTime: 1
 --- !u!114 &5682700565485848784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,25 +127,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5e6e2650682cc464596a77e5997b76b2, type: 2}
   - {fileID: 11400000, guid: 4e5e13bdb15b529439d03041aed115b3, type: 2}
   skeletonGraphic: {fileID: 810514440519047957}
-  idleAnim: idle
-  disappearAnim: disappear
---- !u!114 &3264615117109753449
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5186657199718178722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38235e61f7b3b304d8e6cbbdc8a702a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  idleTime: 2
-  playOnStart: 1
-  idleAnim: idle
-  disappearAnim: disappear
-  spawnAreas: []
+  pickOnceOnStart: 1
 --- !u!1 &6474442212249149824
 GameObject:
   m_ObjectHideFlags: 0
