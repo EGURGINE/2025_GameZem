@@ -27,8 +27,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
                         GameObject singleton = new GameObject();
                         _instance = singleton.AddComponent<T>();
                         singleton.name = $"(Singleton) {typeof(T).Name}";
-
-                        DontDestroyOnLoad(singleton);
+                        // DontDestroyOnLoad 완전 제거 - 씬 전환 시 함께 파괴되도록 함
                     }
                 }
 
@@ -42,7 +41,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         if (_instance == null)
         {
             _instance = this as T;
-            DontDestroyOnLoad(gameObject);
+            // DontDestroyOnLoad 완전 제거 - 씬 전환 시 함께 파괴되도록 함
         }
         else if (_instance != this)
         {
@@ -57,6 +56,10 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
     protected virtual void OnDestroy()
     {
-        _applicationIsQuitting = true;
+        if (_instance == this)
+        {
+            _applicationIsQuitting = true;
+            _instance = null;
+        }
     }
 }

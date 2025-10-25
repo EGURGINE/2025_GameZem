@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 47128681}
   m_Layer: 5
   m_Name: title
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -252,7 +252,7 @@ GameObject:
   - component: {fileID: 87714566}
   m_Layer: 5
   m_Name: Handle
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -370,6 +370,7 @@ MonoBehaviour:
   - {fileID: 5983592475587490823, guid: 167e31210685a8a40bf6cadc79890caf, type: 3}
   - {fileID: 5983592475587490823, guid: 97991823c44c5e945bb7f4c7bc73ae41, type: 3}
   spawnContainer: {fileID: 594944017}
+  cutLine: {fileID: 1199972199}
   spawnDelay: 0.5
   spawnInterval: 2
   spawnIntervalVariation: 0.05
@@ -444,6 +445,10 @@ MonoBehaviour:
   - monthName: 2007_3
     cutCount: 2
     obstacles:
+    - type: 5
+      count: 1
+      randomPosition: 0
+      spawnedCount: 0
     - type: 0
       count: 2
       randomPosition: 1
@@ -556,7 +561,11 @@ MonoBehaviour:
       spawnedCount: 0
   - monthName: 2008_2
     cutCount: 2
-    obstacles: []
+    obstacles:
+    - type: 5
+      count: 1
+      randomPosition: 0
+      spawnedCount: 0
   - monthName: 2008_3
     cutCount: 4
     obstacles:
@@ -644,6 +653,10 @@ MonoBehaviour:
   - monthName: 2008_11
     cutCount: 5
     obstacles:
+    - type: 5
+      count: 1
+      randomPosition: 0
+      spawnedCount: 0
     - type: 2
       count: 2
       randomPosition: 0
@@ -2062,7 +2075,11 @@ MonoBehaviour:
       spawnedCount: 0
   - monthName: 2020_4
     cutCount: 2
-    obstacles: []
+    obstacles:
+    - type: 5
+      count: 0
+      randomPosition: 0
+      spawnedCount: 0
   - monthName: 2020_5
     cutCount: 8
     obstacles:
@@ -2116,7 +2133,7 @@ GameObject:
   - component: {fileID: 130177140}
   m_Layer: 5
   m_Name: Image
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2192,7 +2209,7 @@ GameObject:
   - component: {fileID: 201849472}
   m_Layer: 5
   m_Name: lives_text
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2204,7 +2221,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 201849468}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2212,7 +2229,7 @@ RectTransform:
   - {fileID: 130177139}
   - {fileID: 1685982551}
   - {fileID: 1252851226}
-  m_Father: {fileID: 963820627}
+  m_Father: {fileID: 724885814}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -2266,7 +2283,7 @@ GameObject:
   - component: {fileID: 220778752}
   m_Layer: 5
   m_Name: Handle
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2341,7 +2358,7 @@ GameObject:
   - component: {fileID: 245998635}
   m_Layer: 5
   m_Name: fill
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2538,7 +2555,7 @@ MonoBehaviour:
   pausePanel: {fileID: 1040915024}
   pauseButton: {fileID: 651055813}
   resumeButton: {fileID: 476534751}
-  pauseBestScoreText: {fileID: 0}
+  pauseTitleButton: {fileID: 2067282101}
   settingsPanel: {fileID: 0}
   volumeSlider: {fileID: 1777469277}
   soundToggle: {fileID: 0}
@@ -2559,7 +2576,7 @@ GameObject:
   - component: {fileID: 409149687}
   m_Layer: 5
   m_Name: title
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2695,7 +2712,7 @@ GameObject:
   - component: {fileID: 414131867}
   m_Layer: 5
   m_Name: best
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2999,7 +3016,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ef2e389b27baf469cc91c5a706db24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwingObjectsPrefab: {fileID: 2104019422651670392, guid: d801757a8088cd64ca15f9c156444b3c, type: 3}
+  throwingObjectsPrefab: {fileID: 5241086255014812743, guid: e6cd5d389802182489537cc939827ba3, type: 3}
   editorPressurePrefab: {fileID: 1275352736991526200, guid: 43d2a0c119fd2a34f989350bfb31f5fd, type: 3}
   cutLineTapePrefab: {fileID: 0}
   speechBubbleOverlayPrefab: {fileID: 1447423960492291332, guid: 9920c5d62a6161b46aa1e19b262500fa, type: 3}
@@ -3019,7 +3036,7 @@ GameObject:
   - component: {fileID: 447666327}
   m_Layer: 5
   m_Name: Background
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3095,7 +3112,7 @@ GameObject:
   - component: {fileID: 476534751}
   m_Layer: 5
   m_Name: close_btn
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3214,7 +3231,7 @@ GameObject:
   - component: {fileID: 522903746}
   m_Layer: 5
   m_Name: Fill
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3289,7 +3306,7 @@ GameObject:
   - component: {fileID: 531010682}
   m_Layer: 5
   m_Name: fill (2)
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3364,7 +3381,7 @@ GameObject:
   - component: {fileID: 541696797}
   m_Layer: 5
   m_Name: cur_score
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3536,7 +3553,7 @@ GameObject:
   - component: {fileID: 651055813}
   m_Layer: 5
   m_Name: pause_btn
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3548,12 +3565,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 651055811}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 963820627}
+  m_Father: {fileID: 724885814}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -3642,6 +3659,43 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 651055811}
   m_CullTransparentMesh: 1
+--- !u!1 &724885813
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 724885814}
+  m_Layer: 5
+  m_Name: top_ui
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &724885814
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 724885813}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 201849469}
+  - {fileID: 651055812}
+  m_Father: {fileID: 1371921846}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &726036819
 GameObject:
   m_ObjectHideFlags: 0
@@ -3655,7 +3709,7 @@ GameObject:
   - component: {fileID: 726036821}
   m_Layer: 5
   m_Name: bg
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3735,7 +3789,7 @@ GameObject:
   - component: {fileID: 742001216}
   m_Layer: 5
   m_Name: Image
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3810,7 +3864,7 @@ GameObject:
   - component: {fileID: 855029764}
   m_Layer: 5
   m_Name: best_score
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3983,10 +4037,6 @@ MonoBehaviour:
   successThreshold: 0.5
   touchWindowTime: 1
   monthIncreaseInterval: 5
-  cutPrefab: {fileID: 5983592475587490823, guid: 78e707c0f10c1c14d9224c6b813a7ba8, type: 3}
-  cutContainer: {fileID: 594944017}
-  cutLine: {fileID: 1199972199}
-  cutSpawner: {fileID: 99338043}
   saveDataList:
   - date: 
     time: 0
@@ -4004,7 +4054,7 @@ GameObject:
   - component: {fileID: 936998707}
   m_Layer: 5
   m_Name: Background
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4077,7 +4127,7 @@ GameObject:
   - component: {fileID: 963820627}
   m_Layer: 5
   m_Name: ui
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4095,10 +4145,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1567867132}
-  - {fileID: 201849469}
   - {fileID: 1985305465}
   - {fileID: 1513467045}
-  - {fileID: 651055812}
   - {fileID: 1040915025}
   m_Father: {fileID: 1371921846}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4136,10 +4184,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 919872154}
   - {fileID: 368363359}
+  - {fileID: 919872154}
   - {fileID: 444910706}
-  - {fileID: 1746698327}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1040915024
@@ -4155,7 +4202,7 @@ GameObject:
   - component: {fileID: 1040915026}
   m_Layer: 5
   m_Name: pause_popup
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4231,7 +4278,7 @@ GameObject:
   - component: {fileID: 1057977026}
   m_Layer: 5
   m_Name: content
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4309,7 +4356,7 @@ GameObject:
   - component: {fileID: 1148552859}
   m_Layer: 5
   m_Name: Fill
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4479,7 +4526,7 @@ GameObject:
   - component: {fileID: 1206032769}
   m_Layer: 5
   m_Name: Text (TMP)
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4615,7 +4662,7 @@ GameObject:
   - component: {fileID: 1252851227}
   m_Layer: 5
   m_Name: Image (2)
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4690,7 +4737,7 @@ GameObject:
   - component: {fileID: 1326195983}
   m_Layer: 5
   m_Name: Slider
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4865,8 +4912,9 @@ RectTransform:
   m_Children:
   - {fileID: 307623638}
   - {fileID: 99338042}
-  - {fileID: 963820627}
   - {fileID: 1735958475}
+  - {fileID: 963820627}
+  - {fileID: 724885814}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -4885,7 +4933,7 @@ GameObject:
   - component: {fileID: 1372212595}
   m_Layer: 5
   m_Name: Fill Area
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4923,7 +4971,7 @@ GameObject:
   - component: {fileID: 1423689606}
   m_Layer: 5
   m_Name: fill (1)
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4998,7 +5046,7 @@ GameObject:
   - component: {fileID: 1513467046}
   m_Layer: 5
   m_Name: game_over_panel
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5074,7 +5122,7 @@ GameObject:
   - component: {fileID: 1567867133}
   m_Layer: 5
   m_Name: bg
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5150,7 +5198,7 @@ GameObject:
   - component: {fileID: 1625242690}
   m_Layer: 5
   m_Name: icon
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5267,7 +5315,7 @@ GameObject:
   - component: {fileID: 1634554452}
   m_Layer: 5
   m_Name: Fill Area
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5384,7 +5432,7 @@ GameObject:
   - component: {fileID: 1685982552}
   m_Layer: 5
   m_Name: Image (1)
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5482,37 +5530,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1746698326
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1746698327}
-  m_Layer: 0
-  m_Name: InputManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1746698327
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1746698326}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1012941697}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1777469275
 GameObject:
   m_ObjectHideFlags: 0
@@ -5525,7 +5542,7 @@ GameObject:
   - component: {fileID: 1777469277}
   m_Layer: 5
   m_Name: SoundSlider
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5615,7 +5632,7 @@ GameObject:
   - component: {fileID: 1915761641}
   m_Layer: 5
   m_Name: Handle Slide Area
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5653,7 +5670,7 @@ GameObject:
   - component: {fileID: 1985305463}
   m_Layer: 5
   m_Name: score_text
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5793,7 +5810,7 @@ GameObject:
   - component: {fileID: 1996868315}
   m_Layer: 5
   m_Name: replay
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5910,7 +5927,7 @@ GameObject:
   - component: {fileID: 2027952559}
   m_Layer: 5
   m_Name: Handle Slide Area
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5949,11 +5966,11 @@ GameObject:
   - component: {fileID: 2067282101}
   m_Layer: 5
   m_Name: title_btn
-  m_TagString: Untagged
+  m_TagString: ui_button
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2067282100
 RectTransform:
   m_ObjectHideFlags: 0

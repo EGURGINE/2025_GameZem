@@ -36,7 +36,7 @@ public class Cut : MonoBehaviour
     
     // Double Click Detection
     private float lastClickTime = 0f;
-    private float doubleClickThreshold = 0.5f; // 더블클릭으로 인정하는 시간 간격 (초)
+    private float doubleClickThreshold = 0.3f; // 더블클릭으로 인정하는 시간 간격 (초) - 연타에 관대하게 수정
 
     [Header("Spine")]
     private Spine.Unity.SkeletonAnimation skeletonAnimation;
@@ -122,8 +122,20 @@ public class Cut : MonoBehaviour
                     string animToPlay = idleAnimationName;
                     if (skeletonGraphic.Skeleton.Data.FindAnimation(idleAnimationName) == null)
                     {
-                        Debug.LogWarning($"[Cut] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 'idle'로 대체합니다.");
-                        animToPlay = "idle";
+                        Debug.LogWarning($"[Cut] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 사용 가능한 애니메이션을 찾는 중...");
+                        
+                        // 사용 가능한 애니메이션 목록에서 첫 번째 애니메이션 사용
+                        var animations = skeletonGraphic.Skeleton.Data.Animations;
+                        if (animations.Count > 0)
+                        {
+                            animToPlay = animations.Items[0].Name;
+                            Debug.Log($"[Cut] '{animToPlay}' 애니메이션으로 대체합니다.");
+                        }
+                        else
+                        {
+                            Debug.LogError("[Cut] 사용 가능한 애니메이션이 없습니다!");
+                            return;
+                        }
                     }
                     
                     var trackEntry = skeletonGraphic.AnimationState.SetAnimation(0, animToPlay, false);
@@ -401,14 +413,27 @@ public class Cut : MonoBehaviour
     // CutSpawner에서 호출 - CutLine 범위 내에 있는지 확인
     public bool IsInCutLineRange()
     {
-        if (!isWaitingForTouch || hasPassedCutLine) return false;
-        if (cutLineRectTransform == null) return false;
+        if (!isWaitingForTouch || hasPassedCutLine) 
+        {
+            Debug.Log($"[Cut] IsInCutLineRange false - isWaitingForTouch: {isWaitingForTouch}, hasPassedCutLine: {hasPassedCutLine}");
+            return false;
+        }
+        if (cutLineRectTransform == null) 
+        {
+            Debug.Log("[Cut] IsInCutLineRange false - cutLineRectTransform is null");
+            return false;
+        }
         
         float cutLineY = cutLineRectTransform.anchoredPosition.y;
         float cutY = rectTransform.anchoredPosition.y;
         float cutTopY = cutY + (rectTransform.sizeDelta.y / 2f);
+        float distance = Mathf.Abs(cutTopY - cutLineY);
+        float threshold = successRange * 100f;
         
-        return Mathf.Abs(cutTopY - cutLineY) <= successRange * 100f;
+        bool inRange = distance <= threshold;
+        Debug.Log($"[Cut] IsInCutLineRange - cutTopY: {cutTopY:F1}, cutLineY: {cutLineY:F1}, distance: {distance:F1}, threshold: {threshold:F1}, inRange: {inRange}");
+        
+        return inRange;
     }
     
     // Cut의 상단 Y 좌표 반환 (정렬용)
@@ -440,7 +465,7 @@ public class Cut : MonoBehaviour
             }
             else
             {
-                // 첫 번째 클릭 - 시간 저장
+                // 첫 번째 클릭 - 시간 저장하고 잠시 대기
                 lastClickTime = currentTime;
                 return false; // 아직 처리 안됨
             }
@@ -455,6 +480,12 @@ public class Cut : MonoBehaviour
     
     private void ProcessCutInput()
     {
+        // 이미 CutLine을 지나쳤거나 터치 대기 상태가 아니면 처리하지 않음
+        if (hasPassedCutLine || !isWaitingForTouch) 
+        {
+            return;
+        }
+        
         // 컷라인 범위 체크
         float cutLineY = cutLineRectTransform.anchoredPosition.y;
         float cutY = rectTransform.anchoredPosition.y;
@@ -467,6 +498,10 @@ public class Cut : MonoBehaviour
             // 성공 판정
             onSuccess?.Invoke();
             ShowSuccessEffect();
+            
+            // 상태 업데이트
+            hasPassedCutLine = true;
+            isWaitingForTouch = false;
             
             // Cut 내부의 cutLine 게임오브젝트 비활성화
             if (cutLine != null)
@@ -490,8 +525,13 @@ public class Cut : MonoBehaviour
         else
         {
             // 범위 밖에서 터치 - 실패
+            Debug.Log("[Cut] 범위 밖에서 터치 - 실패 판정");
             onMiss?.Invoke();
             ShowMissEffect();
+            
+            // 상태 업데이트
+            hasPassedCutLine = true;
+            isWaitingForTouch = false;
             
             // Cut 내부의 cutLine 게임오브젝트 비활성화
             if (cutLine != null)
@@ -512,9 +552,6 @@ public class Cut : MonoBehaviour
                 cutLineComponent.SetWaitingState(false);
             }
         }
-        
-        hasPassedCutLine = true;
-        isWaitingForTouch = false; // 판정 후 터치 입력 비활성화
     }
     
     
@@ -602,5 +639,35 @@ public class Cut : MonoBehaviour
     private void OnDestroy()
     {
         // 클릭 이벤트 제거 로직 삭제
+    }
+    
+    /// <summary>
+    /// 터치 대기 상태인지 확인
+    /// </summary>
+    public bool IsWaitingForTouch()
+    {
+        return isWaitingForTouch;
+    }
+    
+    /// <summary>
+    /// CutLine을 지나쳤는지 확인
+    /// </summary>
+    public bool HasPassedCutLine()
+    {
+        return hasPassedCutLine;
+    }
+    
+    /// <summary>
+    /// CutLine과의 거리 계산
+    /// </summary>
+    public float GetDistanceToCutLine()
+    {
+        if (cutLineRectTransform == null) return float.MaxValue;
+        
+        float cutLineY = cutLineRectTransform.anchoredPosition.y;
+        float cutY = rectTransform.anchoredPosition.y;
+        float cutTopY = cutY + (rectTransform.sizeDelta.y / 2f);
+        
+        return Mathf.Abs(cutTopY - cutLineY);
     }
 }

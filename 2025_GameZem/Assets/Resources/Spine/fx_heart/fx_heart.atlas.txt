@@ -1,0 +1,13 @@
+fx_heart.png
+size:219,139
+filter:Linear,Linear
+pma:true
+heart_ptc
+bounds:120,84,28,22
+rotate:90
+ray
+bounds:2,114,215,23
+레이어 1
+bounds:2,2,110,116
+offsets:1,1,112,118
+rotate:90

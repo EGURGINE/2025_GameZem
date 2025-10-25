@@ -24,7 +24,7 @@ public class UIManager : Singleton<UIManager>
     public GameObject pausePanel;
     public Button pauseButton;
     public Button resumeButton;
-    public TextMeshProUGUI pauseBestScoreText;
+    public Button pauseTitleButton;
     
     [Header("Settings UI")]
     public GameObject settingsPanel;
@@ -44,15 +44,33 @@ public class UIManager : Singleton<UIManager>
     
     private void Start()
     {
+        Debug.Log("[UIManager] Start"); 
         InitializeUI();
         SubscribeToEvents();
     }
     
     private void InitializeUI()
     {
+        // GameManager를 안전하게 가져오기
+        GameManager gameManager = null;
+        try
+        {
+            gameManager = GameManager.Instance;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[UIManager] GameManager.Instance 접근 중 오류: {e.Message}");
+            gameManager = FindFirstObjectByType<GameManager>();
+        }
+        
+        if (gameManager == null)
+        {
+            gameManager = FindFirstObjectByType<GameManager>();
+        }
+        
         // 초기 UI 상태 설정
-        UpdateLivesDisplay(GameManager.Instance.GetCurrentLives());
-        UpdateDateDisplay(GameManager.Instance.GetCurrentDate());
+        UpdateLivesDisplay(gameManager.GetCurrentLives());
+        UpdateDateDisplay(gameManager.GetCurrentDate());
         UpdateComboDisplay(0);
         
         // 버튼 이벤트 연결
@@ -67,6 +85,9 @@ public class UIManager : Singleton<UIManager>
             
         if (resumeButton != null)
             resumeButton.onClick.AddListener(OnResumeClicked);
+            
+        if (pauseTitleButton != null)
+            pauseTitleButton.onClick.AddListener(OnPauseTitleClicked);
         
         // 패널 초기 상태
         if (gameOverPanel != null)
@@ -81,14 +102,38 @@ public class UIManager : Singleton<UIManager>
     
     private void SubscribeToEvents()
     {
-        if (GameManager.Instance != null)
+        GameManager gameManager = null;
+        try
         {
-            GameManager.Instance.OnDateChanged += UpdateDateDisplay;
-            GameManager.Instance.OnLivesChanged += UpdateLivesDisplay;
-            GameManager.Instance.OnGameOver += ShowGameOverScreen;
-            GameManager.Instance.OnGameCleared += ShowGameClearedScreen;
-            GameManager.Instance.OnComboAdded += AddCombo;
-            GameManager.Instance.OnProgressChanged += UpdateProgressDisplay;
+            gameManager = GameManager.Instance;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[UIManager] GameManager.Instance 접근 중 오류: {e.Message}. 직접 찾기를 시도합니다.");
+            gameManager = FindFirstObjectByType<GameManager>();
+        }
+        
+        if (gameManager == null)
+        {
+            // GameManager.Instance가 null이면 직접 찾기
+            gameManager = FindFirstObjectByType<GameManager>();
+            Debug.Log($"[UIManager] GameManager.Instance가 null이어서 직접 찾기: {(gameManager != null ? "찾음" : "없음")}");
+        }
+        
+        if (gameManager != null)
+        {
+            Debug.Log("[UIManager] GameManager 이벤트 구독 시작");
+            gameManager.OnDateChanged += UpdateDateDisplay;
+            gameManager.OnLivesChanged += UpdateLivesDisplay;
+            gameManager.OnGameOver += ShowGameOverScreen;
+            gameManager.OnGameCleared += ShowGameClearedScreen;
+            gameManager.OnComboAdded += AddCombo;
+            gameManager.OnProgressChanged += UpdateProgressDisplay;
+            Debug.Log("[UIManager] GameManager 이벤트 구독 완료");
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] GameManager를 찾을 수 없어서 이벤트 구독 실패!");
         }
     }
     
@@ -99,6 +144,8 @@ public class UIManager : Singleton<UIManager>
     
     private void UpdateLivesDisplay(int lives)
     {
+        Debug.Log($"[UIManager] UpdateLivesDisplay 호출됨 - lives: {lives}");
+        
         // 하트 아이콘으로 생명 표시
         if (lifeIcons != null && lifeIcons.Length > 0)
         {
@@ -106,9 +153,15 @@ public class UIManager : Singleton<UIManager>
             {
                 if (lifeIcons[i] != null)
                 {
-                    lifeIcons[i].SetActive(i < lives);
+                    bool shouldBeActive = i < lives;
+                    lifeIcons[i].SetActive(shouldBeActive);
+                    Debug.Log($"[UIManager] LifeIcon {i}: {(shouldBeActive ? "활성화" : "비활성화")}");
                 }
             }
+        }
+        else
+        {
+            Debug.LogWarning("[UIManager] lifeIcons가 null이거나 비어있습니다!");
         }
     }
     
@@ -247,7 +300,7 @@ public class UIManager : Singleton<UIManager>
             if (finalScoreText != null)
             {
                 System.DateTime finalDate = GameManager.Instance.GetCurrentDate();
-                finalScoreText.text = $"Reached: {finalDate:yyyy. MM. dd}";
+                finalScoreText.text = $"{finalDate:yyyy. MM. dd}";
             }
             
             // 최고 기록 표시
@@ -282,9 +335,12 @@ public class UIManager : Singleton<UIManager>
     
     private void OnRestartClicked()
     {
-        if (GameManager.Instance != null)
+        var gameManager = GameManager.Instance;
+        
+        if (gameManager == null)
         {
-            GameManager.Instance.RestartGame();
+            gameManager = FindFirstObjectByType<GameManager>();
+            gameManager.RestartGame();
         }
         
         if (gameOverPanel != null)
@@ -298,7 +354,7 @@ public class UIManager : Singleton<UIManager>
     private void OnMainMenuClicked()
     {
         // 메인 메뉴로 이동하는 로직
-        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Title");
     }
     
     private void OnPauseClicked()
@@ -308,8 +364,6 @@ public class UIManager : Singleton<UIManager>
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
-
-            pauseBestScoreText.text = $"{GameManager.Instance.GetBestRecord().date}";
         }
     }
     
@@ -321,6 +375,21 @@ public class UIManager : Singleton<UIManager>
         {
             pausePanel.SetActive(false);
         }
+    }
+    
+    private void OnPauseTitleClicked()
+    {
+        // Time.timeScale을 1로 복원 (일시정지 해제)
+        Time.timeScale = 1f;
+        
+        // 일시정지 패널 닫기
+        if (pausePanel != null)
+        {
+            pausePanel.SetActive(false);
+        }
+        
+        // 타이틀 씬으로 이동
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Title");
     }
     
     public void ShowSettings()
@@ -341,15 +410,32 @@ public class UIManager : Singleton<UIManager>
     
     protected override void OnDestroy()
     {
-        // 이벤트 구독 해제
-        if (GameManager.Instance != null)
+        // Time.timeScale을 1로 복원 (일시정지 상태 해제)
+        Time.timeScale = 1f;
+        
+        // 이벤트 구독 해제 (GameManager가 파괴되었을 수도 있으므로 안전하게 처리)
+        try
         {
-            GameManager.Instance.OnDateChanged -= UpdateDateDisplay;
-            GameManager.Instance.OnLivesChanged -= UpdateLivesDisplay;
-            GameManager.Instance.OnGameOver -= ShowGameOverScreen;
-            GameManager.Instance.OnGameCleared -= ShowGameClearedScreen;
-            GameManager.Instance.OnComboAdded -= AddCombo;
-            GameManager.Instance.OnProgressChanged -= UpdateProgressDisplay;
+            // GameManager를 직접 찾아서 이벤트 구독 해제
+            GameManager gameManager = FindFirstObjectByType<GameManager>();
+            if (gameManager != null)
+            {
+                gameManager.OnDateChanged -= UpdateDateDisplay;
+                gameManager.OnLivesChanged -= UpdateLivesDisplay;
+                gameManager.OnGameOver -= ShowGameOverScreen;
+                gameManager.OnGameCleared -= ShowGameClearedScreen;
+                gameManager.OnComboAdded -= AddCombo;
+                gameManager.OnProgressChanged -= UpdateProgressDisplay;
+                Debug.Log("[UIManager] 이벤트 구독 해제 완료");
+            }
+            else
+            {
+                Debug.Log("[UIManager] GameManager를 찾을 수 없어서 이벤트 구독 해제 건너뜀");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[UIManager] 이벤트 구독 해제 중 오류 발생: {e.Message}");
         }
         
         base.OnDestroy();
