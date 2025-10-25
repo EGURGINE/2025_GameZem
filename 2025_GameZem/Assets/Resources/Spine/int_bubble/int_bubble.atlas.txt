@@ -1,0 +1,8 @@
+int_bubble.png
+size:632,457
+filter:Linear,Linear
+pma:true
+bubble1
+bounds:2,114,628,341
+txt1
+bounds:2,2,532,110

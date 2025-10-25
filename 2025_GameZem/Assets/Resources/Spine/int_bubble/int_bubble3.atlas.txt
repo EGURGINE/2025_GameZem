@@ -1,0 +1,9 @@
+int_bubble3.png
+size:993,521
+filter:Linear,Linear
+pma:true
+bubble3
+bounds:2,2,642,517
+txt3
+bounds:646,19,500,345
+rotate:90
