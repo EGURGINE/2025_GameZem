@@ -1,0 +1,6 @@
+int_dogfoot.png
+size:466,1105
+filter:Linear,Linear
+pma:true
+dog_foot_1
+bounds:2,2,462,1101
