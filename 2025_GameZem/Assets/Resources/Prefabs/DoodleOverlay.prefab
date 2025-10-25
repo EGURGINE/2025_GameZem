@@ -91,13 +91,14 @@ GameObject:
   - component: {fileID: 1417247077585009663}
   - component: {fileID: 5409597372206847145}
   - component: {fileID: 6895875446502424548}
+  - component: {fileID: 7612851704995769210}
   m_Layer: 5
   m_Name: DoodleOverlay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &784034389997555387
 RectTransform:
   m_ObjectHideFlags: 0
@@ -146,7 +147,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 5256589215041716919, guid: 17d9ab658bb912e4d9e0d12b0ffd9b1d, type: 3}
+  m_Sprite: {fileID: -7821857755076810820, guid: 99a89767f5f20da489a3ec97d38f1cb0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -171,17 +172,65 @@ MonoBehaviour:
   requiredErasedRatio: 0.727
   timeLimit: 10
   pauseGameWhileActive: 1
-  hideWhenCleared: 0
+  hideWhenCleared: 1
   brushRadius: 112
   brushHardness: 0.657
   debugText: {fileID: 0}
   countdownText: {fileID: 4152678364458978324}
   onCleared:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: ScratchFinishHandler, Assembly-CSharp
+        m_MethodName: OnScratchCleared
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: ScratchPipeline, Assembly-CSharp
+        m_MethodName: HandleCleared
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onFailed:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: ScratchPipeline, Assembly-CSharp
+        m_MethodName: HandleFailed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   hideFadeOut: 0.15
   destroyOnClear: 1
   postClearFreezeSeconds: 2
+--- !u!225 &7612851704995769210
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5948494270926209820}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 1
