@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,6 +8,7 @@ public class CutSpawner : MonoBehaviour
     [Header("Spawn Settings")]
     public GameObject[] cutPrefabs; // 다양한 컷 프리팹들
     public Transform spawnContainer;
+    public Transform cutLine; // 컷 라인 (GameManager에 제공할 용도)
     public float spawnDelay = 0.5f; // 컷 스폰 딜레이 (초)
     public float spawnInterval = 2f;
     public float spawnIntervalVariation = 0.5f; // 스폰 간격 변화량
@@ -55,6 +57,10 @@ public class CutSpawner : MonoBehaviour
     // 편집자 원고 독촉 이벤트
     private bool isEditorPressureActive = false;
     
+    // CutSpawner 자체 게임 상태 관리 (씬 전환 시 안정성을 위해)
+    private bool isGameActive = true;
+    private bool isGameCleared = false;
+    
     // 타임라인 기반 스폰 시스템
     [Header("Timeline Settings")]
     public float monthDuration = 5f; // 한 달 지속 시간 (초)
@@ -64,6 +70,23 @@ public class CutSpawner : MonoBehaviour
     
     private void Start()
     {
+        // 게임 상태 초기화 (씬 전환 시 안정성을 위해)
+        isGameActive = true;
+        isGameCleared = false;
+        
+        // GameManager가 있으면 상태 동기화
+        if (GameManager.Instance != null)
+        {
+            Debug.Log("[CutSpawner] GameManager와 상태 동기화 중...");
+            // GameManager의 상태를 CutSpawner에 반영
+            isGameActive = GameManager.Instance.IsGameActive();
+            isGameCleared = GameManager.Instance.IsGameCleared();
+            Debug.Log($"[CutSpawner] 동기화 완료 - isGameActive: {isGameActive}, isGameCleared: {isGameCleared}");
+        }
+        
+        // Time.timeScale도 확실히 1로 설정
+        Time.timeScale = 1f;
+        
         currentSpawnInterval = spawnInterval;
         InitializePool();
         
@@ -73,19 +96,37 @@ public class CutSpawner : MonoBehaviour
             InitializeDefaultStages();
         }
         
+        // CutLine 초기화 (Inspector에서 설정되지 않았으면 자동으로 찾기)
+        if (cutLine == null)
+        {
+            cutLine = GetCutLine();
+            if (cutLine != null)
+            {
+                Debug.Log($"[CutSpawner] CutLine을 자동으로 초기화했습니다: {cutLine.name}");
+            }
+            else
+            {
+                Debug.LogWarning("[CutSpawner] CutLine을 찾을 수 없습니다. Inspector에서 수동으로 설정해주세요.");
+            }
+        }
+        else
+        {
+            Debug.Log($"[CutSpawner] CutLine이 이미 설정되어 있습니다: {cutLine.name}");
+        }
+        
         StartStage(currentStageIndex);
     }
     
     private void Update()
     {
-        // 게임이 활성화 상태이고 스테이지가 진행 중일 때만
-        if (!GameManager.Instance.IsGameActive()) return;
+        // 게임이 비활성화 상태이거나 클리어된 상태면 대기
+        if (!isGameActive || isGameCleared) return;
         if (currentStageIndex >= monthStages.Count) return;
         
         stageTimer += Time.deltaTime;
         
-        // 시간에 따른 난이도 점진적 증가
-        IncreaseDifficulty();
+        // 시간에 따른 난이도 점진적 증가 (주석처리)
+        // IncreaseDifficulty();
         
         // 타임라인 체크 - 스폰할 이벤트가 있는지
         while (nextSpawnIndex < spawnTimeline.Count && spawnTimeline[nextSpawnIndex].spawnTime <= stageTimer)
@@ -138,38 +179,65 @@ public class CutSpawner : MonoBehaviour
         // 터치 또는 마우스 클릭 감지
         if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
-            // CutLine 범위 내에 있는 Cut들 찾기
-            List<Cut> cutsInRange = new List<Cut>();
+            // UI 요소를 터치했는지 확인
+            if (IsUITouched())
+            {
+                Debug.Log("[CutSpawner] UI 터치 감지 - Cut 터치 처리 건너뜀");
+                return;
+            }
+            // CutLine과 가장 가까운 Cut 찾기
+            Cut closestCut = null;
+            float closestDistance = float.MaxValue;
+            Debug.Log($"[CutSpawner] activeCuts.Count: {activeCuts.Count}");
+            
             foreach (GameObject cutObj in activeCuts)
             {
-                if (cutObj == null || !cutObj.activeInHierarchy) continue;
+                if (cutObj == null || !cutObj.activeInHierarchy) 
+                {
+                    Debug.Log($"[CutSpawner] Cut 제외 - null: {cutObj == null}, activeInHierarchy: {cutObj?.activeInHierarchy}");
+                    continue;
+                }
                 
                 Cut cutScript = cutObj.GetComponent<Cut>();
-                if (cutScript != null && cutScript.IsInCutLineRange())
+                if (cutScript != null)
                 {
-                    cutsInRange.Add(cutScript);
+                    // 터치 대기 상태이고 아직 처리되지 않은 Cut만 고려
+                    if (cutScript.IsWaitingForTouch() && !cutScript.HasPassedCutLine())
+                    {
+                        // CutLine과의 거리 계산
+                        float distance = cutScript.GetDistanceToCutLine();
+                        Debug.Log($"[CutSpawner] Cut 거리: {distance:F1}");
+                        
+                        if (distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            closestCut = cutScript;
+                            Debug.Log($"[CutSpawner] 가장 가까운 Cut 업데이트 - 거리: {distance:F1}");
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log($"[CutSpawner] Cut 제외 - 터치 대기 상태 아님 또는 이미 처리됨");
+                    }
+                }
+                else
+                {
+                    Debug.Log("[CutSpawner] Cut 컴포넌트 없음");
                 }
             }
+
+            Debug.Log($"closestCut: {(closestCut != null ? "찾음" : "없음")}, 거리: {closestDistance:F1}");
             
-            // CutLine 범위 내에 Cut이 없으면 리턴
-            if (cutsInRange.Count == 0) return;
-            
-            // Y 좌표가 가장 낮은 Cut 찾기 (화면에서 가장 아래쪽, CutLine에 가장 가까운)
-            Cut topMostCut = cutsInRange[0];
-            float lowestY = topMostCut.GetCutTopY();
-            
-            for (int i = 1; i < cutsInRange.Count; i++)
+            // 가장 가까운 Cut이 없으면 리턴
+            if (closestCut == null) 
             {
-                float currentY = cutsInRange[i].GetCutTopY();
-                if (currentY < lowestY)
-                {
-                    lowestY = currentY;
-                    topMostCut = cutsInRange[i];
-                }
+                Debug.Log("[CutSpawner] 터치 가능한 Cut이 없음");
+                return;
             }
             
-            // 가장 위에 있는 Cut만 터치 처리
-            topMostCut.TryProcessClick();
+            // 가장 가까운 Cut만 터치 처리
+            Debug.Log($"[CutSpawner] 가장 가까운 Cut 터치 처리: {closestCut.name}");
+            closestCut.TryProcessClick();
         }
     }
     
@@ -691,10 +759,41 @@ public class CutSpawner : MonoBehaviour
     {
         Debug.Log("Cut success!");
         
-        // GameManager에 알림
-        if (GameManager.Instance != null)
+        // 게임이 비활성화 상태면 처리하지 않음
+        if (!isGameActive || isGameCleared)
         {
-            GameManager.Instance.OnCutSuccessCallback();
+            Debug.Log("[CutSpawner] 게임이 비활성화 상태라서 OnCutSuccess 처리 건너뜀");
+            return;
+        }
+        
+        // GameManager를 안전하게 가져오기
+        GameManager gameManager = null;
+        try
+        {
+            gameManager = GameManager.Instance;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[CutSpawner] GameManager.Instance 접근 중 오류: {e.Message}. 직접 찾기를 시도합니다.");
+            gameManager = FindFirstObjectByType<GameManager>();
+        }
+        
+        if (gameManager == null)
+        {
+            // GameManager.Instance가 null이면 직접 찾기
+            gameManager = FindFirstObjectByType<GameManager>();
+        }
+        
+        if (gameManager != null)
+        {
+            try
+            {
+                gameManager.OnCutSuccessCallback();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[CutSpawner] GameManager.OnCutSuccessCallback() 호출 실패: {e.Message}");
+            }
         }
         
         // SpawnCutsCoroutine에서 자동으로 다음 컷을 스폰하므로 여기서는 알림만
@@ -702,12 +801,53 @@ public class CutSpawner : MonoBehaviour
     
     private void OnCutMiss()
     {
-        Debug.Log("Cut miss!");
+        Debug.Log("[CutSpawner] OnCutMiss 호출됨");
         
-        // GameManager에 알림
-        if (GameManager.Instance != null)
+        // 게임이 비활성화 상태면 처리하지 않음
+        if (!isGameActive || isGameCleared)
         {
-            GameManager.Instance.OnCutMissCallback();
+            Debug.Log("[CutSpawner] 게임이 비활성화 상태라서 OnCutMiss 처리 건너뜀");
+            return;
+        }
+        
+        // GameManager를 안전하게 가져오기
+        GameManager gameManager = null;
+        try
+        {
+            gameManager = GameManager.Instance;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[CutSpawner] GameManager.Instance 접근 중 오류: {e.Message}. 직접 찾기를 시도합니다.");
+            gameManager = FindFirstObjectByType<GameManager>();
+        }
+        
+        if (gameManager == null)
+        {
+            // GameManager.Instance가 null이면 직접 찾기
+            gameManager = FindFirstObjectByType<GameManager>();
+            Debug.Log($"[CutSpawner] GameManager.Instance가 null이어서 직접 찾기: {(gameManager != null ? "찾음" : "없음")}");
+        }
+        
+        if (gameManager != null)
+        {
+
+
+            
+            Debug.Log("[CutSpawner] GameManager 존재함 - OnCutMissCallback() 호출");
+            try
+            {
+                gameManager.OnCutMissCallback();
+                Debug.Log("[CutSpawner] GameManager.OnCutMissCallback() 호출 완료");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[CutSpawner] GameManager.OnCutMissCallback() 호출 실패: {e.Message}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[CutSpawner] GameManager를 찾을 수 없습니다!");
         }
         
         // SpawnCutsCoroutine에서 자동으로 다음 컷을 스폰하므로 여기서는 알림만
@@ -824,9 +964,180 @@ public class CutSpawner : MonoBehaviour
         Debug.Log("Game Ending: All cuts and obstacles cleared");
     }
     
+    /// <summary>
+    /// 게임 상태 제어 메서드들 (씬 전환 시 안정성을 위해)
+    /// </summary>
+    
+    /// <summary>
+    /// 게임을 일시정지/재개
+    /// </summary>
+    public void SetGameActive(bool active)
+    {
+        isGameActive = active;
+        Debug.Log($"[CutSpawner] 게임 상태 변경: {(active ? "활성화" : "비활성화")}");
+    }
+    
+    /// <summary>
+    /// 게임 클리어 상태 설정
+    /// </summary>
+    public void SetGameCleared(bool cleared)
+    {
+        isGameCleared = cleared;
+        if (cleared)
+        {
+            isGameActive = false;
+            Debug.Log("[CutSpawner] 게임 클리어됨");
+        }
+    }
+    
+    /// <summary>
+    /// 게임 상태 초기화
+    /// </summary>
+    public void ResetGameState()
+    {
+        isGameActive = true;
+        isGameCleared = false;
+        
+        // Time.timeScale도 확실히 1로 설정
+        Time.timeScale = 1f;
+        
+        // 스테이지 타이머와 인덱스 초기화
+        stageTimer = 0f;
+        nextSpawnIndex = 0;
+        
+        Debug.Log("[CutSpawner] 게임 상태 초기화됨");
+    }
+    
+    /// <summary>
+    /// GameManager와 상태 동기화 (필요한 시점에만 호출)
+    /// </summary>
+    public void SyncWithGameManager()
+    {
+        if (GameManager.Instance != null)
+        {
+            isGameActive = GameManager.Instance.IsGameActive();
+            isGameCleared = GameManager.Instance.IsGameCleared();
+            Debug.Log($"[CutSpawner] GameManager와 상태 동기화 - isGameActive: {isGameActive}, isGameCleared: {isGameCleared}");
+        }
+    }
+    
+    /// <summary>
+    /// 현재 게임이 활성화 상태인지 확인
+    /// </summary>
+    public bool IsGameActive()
+    {
+        return isGameActive && !isGameCleared;
+    }
+    
     private void OnDestroy()
     {
+        // 게임 상태를 비활성화로 설정
+        isGameActive = false;
+        isGameCleared = true;
+        
+        // 모든 컷 정리
         ClearAllCuts();
+        
+        Debug.Log("[CutSpawner] OnDestroy - 게임 상태 정리 완료");
+    }
+    
+    /// <summary>
+    /// CutLine을 자동으로 찾는 메서드 (CutSpawner 자체 초기화용)
+    /// </summary>
+    private Transform GetCutLine()
+    {
+        // CutSpawner의 cutLine이 설정되어 있으면 그것을 반환
+        if (cutLine != null)
+        {
+            return cutLine;
+        }
+        
+        // cutLine이 null이면 spawnContainer에서 찾기
+        if (spawnContainer != null)
+        {
+            // CutLine을 찾는 로직
+            Transform foundCutLine = spawnContainer.Find("CutLine");
+            if (foundCutLine == null)
+            {
+                foundCutLine = spawnContainer.Find("cutLine");
+            }
+            if (foundCutLine == null)
+            {
+                // CutLine 컴포넌트를 가진 자식 찾기
+                Transform[] children = spawnContainer.GetComponentsInChildren<Transform>();
+                foreach (Transform child in children)
+                {
+                    if (child != spawnContainer && child.name.ToLower().Contains("line"))
+                    {
+                        foundCutLine = child;
+                        break;
+                    }
+                }
+            }
+            
+            // 찾은 cutLine을 CutSpawner의 cutLine에 저장
+            if (foundCutLine != null)
+            {
+                cutLine = foundCutLine;
+                Debug.Log($"[CutSpawner] CutLine을 자동으로 찾아서 설정했습니다: {cutLine.name}");
+            }
+            
+            return foundCutLine;
+        }
+        return null;
+    }
+    
+    /// <summary>
+    /// 특정 UI 버튼이 터치되었는지 확인
+    /// </summary>
+    private bool IsUITouched()
+    {
+        // EventSystem을 사용하여 UI 터치 감지
+        if (UnityEngine.EventSystems.EventSystem.current != null)
+        {
+            UnityEngine.EventSystems.PointerEventData pointerData;
+            
+            // 마우스/터치 위치에서 UI 요소 확인
+            if (Input.touchCount > 0)
+            {
+                // 터치 입력
+                pointerData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);
+                pointerData.position = Input.GetTouch(0).position;
+            }
+            else
+            {
+                // 마우스 입력
+                pointerData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);
+                pointerData.position = Input.mousePosition;
+            }
+            
+            var results = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+            UnityEngine.EventSystems.EventSystem.current.RaycastAll(pointerData, results);
+            
+            // 특정 버튼들만 확인
+            foreach (var result in results)
+            {
+                if (result.gameObject != null)
+                {
+                    // 버튼 컴포넌트 확인
+                    Button button = result.gameObject.GetComponent<Button>();
+                    if (button != null)
+                    {
+                        // 특정 태그를 가진 버튼들만 감지
+                        string buttonTag = result.gameObject.tag.ToLower();
+                        
+                        // UI 버튼 태그 확인
+                        if (buttonTag == "ui_button" || buttonTag == "game_button")
+                        {
+                            Debug.Log($"[CutSpawner] UI 버튼 터치 감지: {result.gameObject.name} (태그: {buttonTag})");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
     }
 }
 

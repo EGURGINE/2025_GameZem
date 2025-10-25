@@ -19,12 +19,6 @@ public class GameManager : Singleton<GameManager>
     private System.DateTime currentDate;
     private float playTIme = 0;
     
-    [Header("Game Objects")]
-    public GameObject cutPrefab;
-    public Transform cutContainer;
-    public Transform cutLine;
-    public CutSpawner cutSpawner; // CutSpawner 참조
-    
     // Game State
     private int currentLives;
     private int score;
@@ -55,6 +49,8 @@ public class GameManager : Singleton<GameManager>
     
     private void Start()
     {
+        // Time.timeScale을 확실히 1로 설정 (일시정지 상태 해제)
+        Time.timeScale = 1f;
         StartGame();
     }
     
@@ -68,15 +64,33 @@ public class GameManager : Singleton<GameManager>
     
     private void InitializeGame()
     {
+        // Time.timeScale을 확실히 1로 설정
+        Time.timeScale = 1f;
+        
         currentLives = maxLives;
         score = 0;
         currentDate = startDate;
         isGameActive = true;
         isGameCleared = false;
         
-        // 이벤트로 초기 상태 알림
-        OnDateChanged?.Invoke(currentDate);
-        OnLivesChanged?.Invoke(currentLives);
+        // CutSpawner 상태도 초기화 (씬 전환 시 안정성을 위해)
+        CutSpawner cutSpawner = FindFirstObjectByType<CutSpawner>();
+        if (cutSpawner != null)
+        {
+            cutSpawner.ResetGameState();
+            Debug.Log("[GameManager] CutSpawner 게임 상태 초기화됨");
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] CutSpawner를 찾을 수 없습니다!");
+        }
+        
+        // 필요한 객체들이 null이면 자동으로 찾기
+        //FindRequiredObjects();
+        
+        // 이벤트로 초기 상태 알림 (안전하게 호출)
+        SafeInvokeEvent(() => OnDateChanged?.Invoke(currentDate), "OnDateChanged");
+        SafeInvokeEvent(() => OnLivesChanged?.Invoke(currentLives), "OnLivesChanged");
         UpdateProgress();
     }
     
@@ -84,11 +98,6 @@ public class GameManager : Singleton<GameManager>
     {
         // 게임 시작 (타임라인 기반 시스템은 자동으로 진행됨)
         playTIme = 0;
-        
-        if (cutSpawner == null)
-        {
-            Debug.LogWarning("CutSpawner not assigned! Please assign CutSpawner in GameManager.");
-        }
     }
     
     private void UpdateDateProgress()
@@ -108,14 +117,14 @@ public class GameManager : Singleton<GameManager>
         if (newDate > endDate)
         {
             currentDate = endDate;
-            OnDateChanged?.Invoke(currentDate);
+            SafeInvokeEvent(() => OnDateChanged?.Invoke(currentDate), "OnDateChanged");
             UpdateProgress();
             GameCleared();
         }
         else
         {
             currentDate = newDate;
-            OnDateChanged?.Invoke(currentDate);
+            SafeInvokeEvent(() => OnDateChanged?.Invoke(currentDate), "OnDateChanged");
             UpdateProgress();
             Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM. dd"));
         }
@@ -131,7 +140,7 @@ public class GameManager : Singleton<GameManager>
         // 0~1 범위로 제한
         progress = Mathf.Clamp01(progress);
         
-        OnProgressChanged?.Invoke(progress);
+        SafeInvokeEvent(() => OnProgressChanged?.Invoke(progress), "OnProgressChanged");
     }
     
     // CutSpawner에서 호출할 공개 메서드
@@ -140,7 +149,7 @@ public class GameManager : Singleton<GameManager>
         if (!isGameActive || isGameCleared) return;
         
         // 성공 시 점수는 증가하지 않음 (생존만 중요)
-        OnComboAdded?.Invoke();
+        SafeInvokeEvent(() => OnComboAdded?.Invoke(), "OnComboAdded");
         Debug.Log("Cut Success!");
         
         // 성공 효과음 재생
@@ -152,10 +161,17 @@ public class GameManager : Singleton<GameManager>
     
     public void OnCutMissCallback()
     {
-        if (!isGameActive) return;
+        Debug.Log("[GameManager] OnCutMissCallback 호출됨 - isGameActive: " + isGameActive + ", currentLives: " + currentLives);
         
+        if (!isGameActive) 
+        {
+            Debug.Log("[GameManager] 게임이 비활성화 상태라서 피 감소 안함");
+            return;
+        }
+        
+        Debug.Log("[GameManager] 피 감소 전 - 현재 생명: " + currentLives);
         LoseLife();
-        Debug.Log("Cut Miss! Lives: " + currentLives);
+        Debug.Log("[GameManager] Cut Miss! Lives: " + currentLives);
         
         // 실패 효과음 재생
         // if (SoundManager.Instance != null)
@@ -167,11 +183,16 @@ public class GameManager : Singleton<GameManager>
     
     public void LoseLife()
     {
+        Debug.Log($"[GameManager] LoseLife 시작 - currentLives: {currentLives}");
         currentLives--;
-        OnLivesChanged?.Invoke(currentLives);
+        Debug.Log($"[GameManager] currentLives 감소 후: {currentLives}");
+        
+        // 이벤트 호출
+        SafeInvokeEvent(() => OnLivesChanged?.Invoke(currentLives), "OnLivesChanged");
         
         if (currentLives <= 0)
         {
+            Debug.Log("[GameManager] 생명이 0 이하 - GameOver 호출");
             GameOver();
         }
     }
@@ -180,13 +201,17 @@ public class GameManager : Singleton<GameManager>
     {
         isGameActive = false;
         
-        // 모든 컷 제거
+        // 모든 컷 제거 및 게임 상태 설정
+        CutSpawner cutSpawner = FindFirstObjectByType<CutSpawner>();
         if (cutSpawner != null)
         {
-            cutSpawner.ClearAllCuts();
+            cutSpawner.ResetStage();
+            cutSpawner.SetGameActive(false);
         }
+
         
-        OnGameOver?.Invoke();
+        
+        SafeInvokeEvent(() => OnGameOver?.Invoke(), "OnGameOver");
 
         // 게임 기록 저장
         SaveData saveData = new SaveData
@@ -206,13 +231,15 @@ public class GameManager : Singleton<GameManager>
         isGameActive = false;
         isGameCleared = true;
         
-        // 모든 컷 제거
+        // 모든 컷 제거 및 게임 상태 설정
+        CutSpawner cutSpawner = FindFirstObjectByType<CutSpawner>();
         if (cutSpawner != null)
         {
             cutSpawner.ClearAllCuts();
+            cutSpawner.SetGameCleared(true);
         }
         
-        OnGameCleared?.Invoke();
+        SafeInvokeEvent(() => OnGameCleared?.Invoke(), "OnGameCleared");
         
         // 게임 클리어 기록 저장
         SaveData saveData = new SaveData
@@ -260,12 +287,56 @@ public class GameManager : Singleton<GameManager>
         return isGameActive;
     }
     
+    public bool IsGameCleared()
+    {
+        return isGameCleared;
+    }
+    
+    /// <summary>
+    /// 이벤트를 안전하게 호출하는 헬퍼 메서드
+    /// </summary>
+    private void SafeInvokeEvent(System.Action eventAction, string eventName)
+    {
+        if (eventAction != null)
+        {
+            try
+            {
+                // 이벤트 구독자들을 안전하게 호출
+                var invocationList = eventAction.GetInvocationList();
+                if (invocationList != null && invocationList.Length > 0)
+                {
+                    foreach (var handler in invocationList)
+                    {
+                        try
+                        {
+                            handler.DynamicInvoke();
+                        }
+                        catch (System.Exception e)
+                        {
+                            Debug.LogWarning($"[GameManager] {eventName} 이벤트 구독자 호출 실패: {e.Message}");
+                        }
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[GameManager] {eventName} 이벤트 호출 실패: {e.Message}");
+            }
+        }
+    }
+    
     public void RestartGame()
     {
+        // Time.timeScale을 확실히 1로 설정 (일시정지 상태 해제)
+        Time.timeScale = 1f;
+        
         // CutSpawner 리셋 (스테이지를 처음부터)
+        CutSpawner cutSpawner = FindFirstObjectByType<CutSpawner>();
         if (cutSpawner != null)
         {
             cutSpawner.ResetStage();
+            cutSpawner.ResetGameState();
+            cutSpawner.SyncWithGameManager();
         }
         
         // 게임 재시작
@@ -397,6 +468,13 @@ public class GameManager : Singleton<GameManager>
             }
         }
         return clearedRecords;
+    }
+    
+    /// <summary>
+    /// CutSpawner에서 객체들을 설정했는지 확인 (CutSpawner가 자동으로 처리함)
+    /// </summary>
+    private void FindRequiredObjects()
+    {
     }
 }
 
