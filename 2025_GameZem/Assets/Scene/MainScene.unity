@@ -119,6 +119,114 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &26795511
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 26795512}
+  - component: {fileID: 26795514}
+  - component: {fileID: 26795513}
+  m_Layer: 0
+  m_Name: pc (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &26795512
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26795511}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1685982551}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -6.1068726}
+  m_SizeDelta: {x: 86, y: 82}
+  m_Pivot: {x: 0.5, y: 0.4389313}
+--- !u!114 &26795513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26795511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d85b887af7e6c3f45a2e2d2920d641bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 2100000, guid: b66cf7a186d13054989b33a5c90044e4, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  skeletonDataAsset: {fileID: 11400000, guid: e0e2a66a4cd766b459f8eab8b4ea3067, type: 2}
+  additiveMaterial: {fileID: 2100000, guid: 2e8245019faeb8c43b75f9ca3ac8ee34, type: 2}
+  multiplyMaterial: {fileID: 2100000, guid: e74a1f8978a7da348a721508d0d58834, type: 2}
+  screenMaterial: {fileID: 2100000, guid: bab24c479f34eec45be6ea8595891569, type: 2}
+  m_SkeletonColor: {r: 1, g: 1, b: 1, a: 1}
+  initialSkinName: default
+  initialFlipX: 0
+  initialFlipY: 0
+  startingAnimation: appear
+  startingLoop: 0
+  timeScale: 1
+  freeze: 0
+  layoutScaleMode: 0
+  referenceSize: {x: 86, y: 82}
+  pivotOffset: {x: 0, y: 0}
+  referenceScale: 1
+  layoutScale: 1
+  rectTransformSize: {x: 214.99998, y: 26.199997}
+  editReferenceRect: 0
+  updateWhenInvisible: 3
+  allowMultipleCanvasRenderers: 0
+  canvasRenderers: []
+  separatorSlotNames: []
+  enableSeparatorSlots: 0
+  separatorParts: []
+  updateSeparatorPartLocation: 1
+  updateSeparatorPartScale: 0
+  disableMeshAssignmentOnOverride: 1
+  physicsPositionInheritanceFactor: {x: 1, y: 1}
+  physicsRotationInheritanceFactor: 1
+  physicsMovementRelativeTo: {fileID: 0}
+  meshGenerator:
+    settings:
+      useClipping: 1
+      zSpacing: 0
+      tintBlack: 0
+      canvasGroupCompatible: 0
+      pmaVertexColors: 1
+      addNormals: 0
+      calculateTangents: 0
+      immutableTriangles: 0
+  updateTiming: 1
+  unscaledTime: 0
+--- !u!222 &26795514
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26795511}
+  m_CullTransparentMesh: 0
 --- !u!1 &47128679
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,1741 +491,10 @@ MonoBehaviour:
   maxSpawnInterval: 0.5
   speedIncreaseRate: 0.05
   poolSize: 10
-  monthStages:
-  - monthName: 2006_9
-    cutCount: 5
-    obstacles: []
-  - monthName: 2006_10
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2006_11
-    cutCount: 5
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2006_12
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_1
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 3
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_2
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_3
-    cutCount: 2
-    obstacles:
-    - type: 5
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2007_4
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_5
-    cutCount: 5
-    obstacles:
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_6
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_7
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_8
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_9
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2007_10
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2007_11
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2007_12
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_1
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_2
-    cutCount: 2
-    obstacles:
-    - type: 5
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_3
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_4
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_5
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_6
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_7
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_8
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_9
-    cutCount: 5
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2008_10
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2008_11
-    cutCount: 5
-    obstacles:
-    - type: 5
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2008_12
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_1
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_2
-    cutCount: 2
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2009_3
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_4
-    cutCount: 5
-    obstacles:
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_5
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_6
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_7
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_8
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2009_9
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2009_10
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_11
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2009_12
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_1
-    cutCount: 2
-    obstacles: []
-  - monthName: 2010_2
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_3
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_4
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_5
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_6
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_7
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_8
-    cutCount: 5
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2010_9
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2010_10
-    cutCount: 5
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_11
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2010_12
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_1
-    cutCount: 2
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2011_2
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_3
-    cutCount: 5
-    obstacles:
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_4
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_5
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_6
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_7
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2011_8
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2011_9
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_10
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_11
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2011_12
-    cutCount: 2
-    obstacles: []
-  - monthName: 2012_1
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_2
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_3
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_4
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_5
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_6
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_7
-    cutCount: 5
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2012_8
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2012_9
-    cutCount: 5
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_10
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_11
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2012_12
-    cutCount: 2
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2013_1
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_2
-    cutCount: 5
-    obstacles:
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_3
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_4
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_5
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_6
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2013_7
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2013_8
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_9
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_10
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2013_11
-    cutCount: 2
-    obstacles: []
-  - monthName: 2013_12
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_1
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_2
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_3
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_4
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_5
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_6
-    cutCount: 5
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2014_7
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2014_8
-    cutCount: 5
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_9
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_10
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2014_11
-    cutCount: 2
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2014_12
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_1
-    cutCount: 5
-    obstacles:
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_2
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_3
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_4
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_5
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2015_6
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2015_7
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_8
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_9
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_10
-    cutCount: 2
-    obstacles: []
-  - monthName: 2015_11
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2015_12
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_1
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_2
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_3
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_4
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_5
-    cutCount: 5
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2016_6
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2016_7
-    cutCount: 5
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_8
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_9
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_10
-    cutCount: 2
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2016_11
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2016_12
-    cutCount: 5
-    obstacles:
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_1
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_2
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_3
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_4
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2017_5
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2017_6
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_7
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_8
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_9
-    cutCount: 2
-    obstacles: []
-  - monthName: 2017_10
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_11
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2017_12
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_1
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_2
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_3
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_4
-    cutCount: 5
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2018_5
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2018_6
-    cutCount: 5
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_7
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_8
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_9
-    cutCount: 2
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2018_10
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_11
-    cutCount: 5
-    obstacles:
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2018_12
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_1
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_2
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_3
-    cutCount: 5
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2019_4
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-  - monthName: 2019_5
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_6
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_7
-    cutCount: 4
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_8
-    cutCount: 2
-    obstacles: []
-  - monthName: 2019_9
-    cutCount: 4
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_10
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 4
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_11
-    cutCount: 3
-    obstacles:
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2019_12
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2020_1
-    cutCount: 0
-    obstacles:
-    - type: 0
-      count: 1
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2020_2
-    cutCount: 0
-    obstacles:
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 3
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2020_3
-    cutCount: 3
-    obstacles:
-    - type: 4
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2020_4
-    cutCount: 2
-    obstacles:
-    - type: 5
-      count: 0
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2020_5
-    cutCount: 8
-    obstacles:
-    - type: 0
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 3
-      count: 2
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2020_6
-    cutCount: 2
-    obstacles:
-    - type: 1
-      count: 1
-      randomPosition: 0
-      spawnedCount: 0
-  - monthName: 2020_7
-    cutCount: 3
-    obstacles:
-    - type: 0
-      count: 1
-      randomPosition: 1
-      spawnedCount: 0
-    - type: 2
-      count: 2
-      randomPosition: 0
-      spawnedCount: 0
-  currentStageIndex: 0
+  sequenceData: []
+  currentSequenceIndex: 0
+  currentMonth: 5
+  targetMonth: 7
   obstacleManager: {fileID: 444910707}
   monthDuration: 5
 --- !u!1 &130177138
@@ -2151,6 +528,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 245998634}
+  - {fileID: 1878530936}
   m_Father: {fileID: 201849469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2544,6 +922,10 @@ MonoBehaviour:
   - {fileID: 245998633}
   - {fileID: 1423689604}
   - {fileID: 531010680}
+  heartSkeletons:
+  - {fileID: 1878530937}
+  - {fileID: 26795513}
+  - {fileID: 1349150527}
   comboText: {fileID: 0}
   comboSlider: {fileID: 0}
   progressSlider: {fileID: 1326195983}
@@ -3016,7 +1398,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ef2e389b27baf469cc91c5a706db24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  throwingObjectsPrefab: {fileID: 5241086255014812743, guid: e6cd5d389802182489537cc939827ba3, type: 3}
+  throwingObjectsPrefab: {fileID: 5186657199718178722, guid: 47dae786dbf77244684c9688b17ad98b, type: 3}
   editorPressurePrefab: {fileID: 1275352736991526200, guid: 43d2a0c119fd2a34f989350bfb31f5fd, type: 3}
   cutLineTapePrefab: {fileID: 0}
   speechBubbleOverlayPrefab: {fileID: 1447423960492291332, guid: 9920c5d62a6161b46aa1e19b262500fa, type: 3}
@@ -4680,6 +3062,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 531010681}
+  - {fileID: 1349150526}
   m_Father: {fileID: 201849469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -4816,6 +3199,114 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1349150525
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1349150526}
+  - component: {fileID: 1349150528}
+  - component: {fileID: 1349150527}
+  m_Layer: 0
+  m_Name: pc
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1349150526
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1349150525}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1252851226}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -6.1068726}
+  m_SizeDelta: {x: 86, y: 82}
+  m_Pivot: {x: 0.5, y: 0.4389313}
+--- !u!114 &1349150527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1349150525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d85b887af7e6c3f45a2e2d2920d641bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 2100000, guid: b66cf7a186d13054989b33a5c90044e4, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  skeletonDataAsset: {fileID: 11400000, guid: e0e2a66a4cd766b459f8eab8b4ea3067, type: 2}
+  additiveMaterial: {fileID: 2100000, guid: 2e8245019faeb8c43b75f9ca3ac8ee34, type: 2}
+  multiplyMaterial: {fileID: 2100000, guid: e74a1f8978a7da348a721508d0d58834, type: 2}
+  screenMaterial: {fileID: 2100000, guid: bab24c479f34eec45be6ea8595891569, type: 2}
+  m_SkeletonColor: {r: 1, g: 1, b: 1, a: 1}
+  initialSkinName: default
+  initialFlipX: 0
+  initialFlipY: 0
+  startingAnimation: appear
+  startingLoop: 0
+  timeScale: 1
+  freeze: 0
+  layoutScaleMode: 0
+  referenceSize: {x: 86, y: 82}
+  pivotOffset: {x: 0, y: 0}
+  referenceScale: 1
+  layoutScale: 1
+  rectTransformSize: {x: 214.99998, y: 26.199997}
+  editReferenceRect: 0
+  updateWhenInvisible: 3
+  allowMultipleCanvasRenderers: 0
+  canvasRenderers: []
+  separatorSlotNames: []
+  enableSeparatorSlots: 0
+  separatorParts: []
+  updateSeparatorPartLocation: 1
+  updateSeparatorPartScale: 0
+  disableMeshAssignmentOnOverride: 1
+  physicsPositionInheritanceFactor: {x: 1, y: 1}
+  physicsRotationInheritanceFactor: 1
+  physicsMovementRelativeTo: {fileID: 0}
+  meshGenerator:
+    settings:
+      useClipping: 1
+      zSpacing: 0
+      tintBlack: 0
+      canvasGroupCompatible: 0
+      pmaVertexColors: 1
+      addNormals: 0
+      calculateTangents: 0
+      immutableTriangles: 0
+  updateTiming: 1
+  unscaledTime: 0
+--- !u!222 &1349150528
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1349150525}
+  m_CullTransparentMesh: 0
 --- !u!1 &1371921842
 GameObject:
   m_ObjectHideFlags: 0
@@ -5450,6 +3941,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1423689605}
+  - {fileID: 26795512}
   m_Father: {fileID: 201849469}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5621,6 +4113,114 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &1878530935
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1878530936}
+  - component: {fileID: 1878530938}
+  - component: {fileID: 1878530937}
+  m_Layer: 0
+  m_Name: pc (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1878530936
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878530935}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 130177139}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -6.1068726}
+  m_SizeDelta: {x: 86, y: 82}
+  m_Pivot: {x: 0.5, y: 0.4389313}
+--- !u!114 &1878530937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878530935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d85b887af7e6c3f45a2e2d2920d641bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 2100000, guid: b66cf7a186d13054989b33a5c90044e4, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  skeletonDataAsset: {fileID: 11400000, guid: e0e2a66a4cd766b459f8eab8b4ea3067, type: 2}
+  additiveMaterial: {fileID: 2100000, guid: 2e8245019faeb8c43b75f9ca3ac8ee34, type: 2}
+  multiplyMaterial: {fileID: 2100000, guid: e74a1f8978a7da348a721508d0d58834, type: 2}
+  screenMaterial: {fileID: 2100000, guid: bab24c479f34eec45be6ea8595891569, type: 2}
+  m_SkeletonColor: {r: 1, g: 1, b: 1, a: 1}
+  initialSkinName: default
+  initialFlipX: 0
+  initialFlipY: 0
+  startingAnimation: appear
+  startingLoop: 0
+  timeScale: 1
+  freeze: 0
+  layoutScaleMode: 0
+  referenceSize: {x: 86, y: 82}
+  pivotOffset: {x: 0, y: 0}
+  referenceScale: 1
+  layoutScale: 1
+  rectTransformSize: {x: 214.99998, y: 26.199997}
+  editReferenceRect: 0
+  updateWhenInvisible: 3
+  allowMultipleCanvasRenderers: 0
+  canvasRenderers: []
+  separatorSlotNames: []
+  enableSeparatorSlots: 0
+  separatorParts: []
+  updateSeparatorPartLocation: 1
+  updateSeparatorPartScale: 0
+  disableMeshAssignmentOnOverride: 1
+  physicsPositionInheritanceFactor: {x: 1, y: 1}
+  physicsRotationInheritanceFactor: 1
+  physicsMovementRelativeTo: {fileID: 0}
+  meshGenerator:
+    settings:
+      useClipping: 1
+      zSpacing: 0
+      tintBlack: 0
+      canvasGroupCompatible: 0
+      pmaVertexColors: 1
+      addNormals: 0
+      calculateTangents: 0
+      immutableTriangles: 0
+  updateTiming: 1
+  unscaledTime: 0
+--- !u!222 &1878530938
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878530935}
+  m_CullTransparentMesh: 0
 --- !u!1 &1915761640
 GameObject:
   m_ObjectHideFlags: 0
@@ -5970,7 +4570,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2067282100
 RectTransform:
   m_ObjectHideFlags: 0

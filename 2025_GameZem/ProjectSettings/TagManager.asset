@@ -6,6 +6,7 @@ TagManager:
   tags:
   - CutLine
   - Cut
+  - ui_button
   layers:
   - Default
   - TransparentFX

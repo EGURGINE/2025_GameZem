@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Spine.Unity;
 
 public class UIManager : Singleton<UIManager>
 {
     [Header("Game UI")]
     public TextMeshProUGUI dateText; // 날짜 표시 (스코어 대신)
     public GameObject[] lifeIcons; // 하트 아이콘 배열 (3개)
+    public SkeletonGraphic[] heartSkeletons; // 하트 Spine SkeletonGraphic 배열 (3개)
     public TextMeshProUGUI comboText;
     public Slider comboSlider;
     
@@ -41,6 +43,7 @@ public class UIManager : Singleton<UIManager>
     private int maxCombo = 0;
     private float comboTimeLeft = 0f;
     private float maxComboTime = 3f;
+    private int previousLives = 3; // 이전 생명 수를 추적하기 위한 변수
     
     private void Start()
     {
@@ -144,16 +147,65 @@ public class UIManager : Singleton<UIManager>
     
     private void UpdateLivesDisplay(int lives)
     {
-        Debug.Log($"[UIManager] UpdateLivesDisplay 호출됨 - lives: {lives}");
+        Debug.Log($"[UIManager] UpdateLivesDisplay 호출됨 - lives: {lives}, previousLives: {previousLives}");
         
         // 하트 아이콘으로 생명 표시
-        if (lifeIcons != null && lifeIcons.Length > 0)
+        if (lifeIcons != null && lifeIcons.Length > 0 && heartSkeletons != null)
         {
+            // 하트 아이콘 활성/비활성 상태 업데이트
             for (int i = 0; i < lifeIcons.Length; i++)
             {
                 if (lifeIcons[i] != null)
                 {
                     bool shouldBeActive = i < lives;
+                    bool wasActive = lifeIcons[i].activeSelf;
+                    
+                    // 생명이 줄어든 경우 (하트가 사라지는 경우)
+                    if (!shouldBeActive && wasActive && i >= lives && i < previousLives)
+                    {
+                        // heartSkeletons 배열에서 SkeletonGraphic 가져오기
+                        if (i < heartSkeletons.Length && heartSkeletons[i] != null)
+                        {
+                            // 하트를 활성화 (애니메이션 재생을 위해)
+                            //lifeIcons[i].SetActive(true);
+                            heartSkeletons[i].gameObject.SetActive(true);
+                            
+                                                         // "appear" 애니메이션 재생
+                             var trackEntry = heartSkeletons[i].AnimationState.SetAnimation(0, "appear", false);
+                             
+                             if (trackEntry != null && trackEntry.Animation != null)
+                             {
+                                 // 정상 재생
+                                 trackEntry.TrackTime = 0f;
+                                 trackEntry.TimeScale = 1f;
+                                
+                                // 애니메이션 완료 후 오브젝트 비활성화
+                                StartCoroutine(DisableAfterAnimation(heartSkeletons[i], lifeIcons[i]));
+                                
+                                                                 Debug.Log($"[UIManager] 하트 {i}에 appear 애니메이션 재생 - Duration: {trackEntry.Animation.Duration}");
+                                continue; // 이 하트는 비활성화하지 않음 (애니메이션 후 처리)
+                            }
+                        }
+                    }
+                    
+                    // 생명이 늘어난 경우 (처음 시작하거나 생명을 회복한 경우)
+                    if (shouldBeActive && !wasActive)
+                    {
+                        // heartSkeletons 배열에서 SkeletonGraphic 가져오기
+                        if (i < heartSkeletons.Length && heartSkeletons[i] != null)
+                        {
+                            heartSkeletons[i].AnimationState.SetAnimation(0, "appear", false);
+                            Debug.Log($"[UIManager] 하트 {i}에 appear 애니메이션 재생");
+                        }
+                    }
+                    
+                    // 일반적인 활성/비활성 처리 (애니메이션 중이 아닌 경우에만)
+                    if (!shouldBeActive && wasActive && i < lives)
+                    {
+                        // 이미 애니메이션 처리된 경우 건너뜀
+                        continue;
+                    }
+                    
                     lifeIcons[i].SetActive(shouldBeActive);
                     Debug.Log($"[UIManager] LifeIcon {i}: {(shouldBeActive ? "활성화" : "비활성화")}");
                 }
@@ -161,7 +213,30 @@ public class UIManager : Singleton<UIManager>
         }
         else
         {
-            Debug.LogWarning("[UIManager] lifeIcons가 null이거나 비어있습니다!");
+            Debug.LogWarning("[UIManager] lifeIcons 또는 heartSkeletons가 null이거나 비어있습니다!");
+        }
+        
+        // 이전 생명 수 업데이트
+        previousLives = lives;
+    }
+    
+    private System.Collections.IEnumerator DisableAfterAnimation(SkeletonGraphic skeletonGraphic, GameObject lifeIcon)
+    {
+        // 애니메이션 재생 시간 대기
+        if (skeletonGraphic != null && skeletonGraphic.AnimationState != null)
+        {
+            var animation = skeletonGraphic.Skeleton.Data.FindAnimation("appear");
+            if (animation != null)
+            {
+                yield return new WaitForSeconds(animation.Duration);
+            }
+        }
+        
+        // 애니메이션 완료 후 오브젝트 비활성화
+        if (lifeIcon != null)
+        {
+            lifeIcon.SetActive(false);
+            Debug.Log($"[UIManager] 하트 애니메이션 완료 후 비활성화");
         }
     }
     
@@ -335,12 +410,15 @@ public class UIManager : Singleton<UIManager>
     
     private void OnRestartClicked()
     {
-        var gameManager = GameManager.Instance;
         
-        if (gameManager == null)
+        if (GameManager.Instance == null)
         {
-            gameManager = FindFirstObjectByType<GameManager>();
+            var gameManager = FindFirstObjectByType<GameManager>();
             gameManager.RestartGame();
+        }
+        else
+        {
+            GameManager.Instance.RestartGame();
         }
         
         if (gameOverPanel != null)

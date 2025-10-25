@@ -493,7 +493,7 @@ public class Cut : MonoBehaviour
         
         // 컷라인 범위 내에서 터치했는지 확인
         CutLine cutLineComponent = cutLineTransform.GetComponent<CutLine>();
-        if (Mathf.Abs(cutTopY - cutLineY) <= successRange * 100f)
+        if (Mathf.Abs(cutTopY - cutLineY) <= successRange * 200f)
         {
             // 성공 판정
             onSuccess?.Invoke();
