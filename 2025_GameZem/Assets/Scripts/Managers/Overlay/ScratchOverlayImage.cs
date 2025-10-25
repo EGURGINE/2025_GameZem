@@ -33,6 +33,10 @@ public class ScratchOverlayImage : MonoBehaviour
     [Tooltip("성공 후 오브젝트를 아예 파괴할지 여부")]
     [SerializeField] bool destroyOnClear = false;
 
+    [Header("Post Clear Freeze")]
+    [Tooltip("성공 후 게임을 멈출(터치 불가) 시간(초), 0이면 바로 진행")]
+    [SerializeField] float postClearFreezeSeconds = 1.0f;
+
     // ---- internals ----
     Image _img;
     Canvas _canvas;
@@ -48,6 +52,9 @@ public class ScratchOverlayImage : MonoBehaviour
     int _lastShownCountdown = -1;
     bool _paused = false;
     Coroutine _timerCo;
+
+    // 원래 타임스케일 저장 (중요!)
+    float _savedTimeScale = 1f;
 
     void Awake()
     {
@@ -87,13 +94,16 @@ public class ScratchOverlayImage : MonoBehaviour
 
     void OnEnable()
     {
+        // 현재 스케일을 먼저 저장하고, 필요하면 0으로 멈춤
+        _savedTimeScale = Time.timeScale;
+
         if (pauseGameWhileActive) Time.timeScale = 0f;
         _active = true;
         _paused = false;
         _elapsedUnscaled = 0f;
         _lastShownCountdown = -1;
 
-        // 페이드 중 클릭 막힘 방지용 CanvasGroup 초기화(있으면)
+        // 페이드/입력차단 제어용 CanvasGroup 초기화(있으면)
         var cg = GetComponent<CanvasGroup>();
         if (cg) { cg.alpha = 1f; cg.blocksRaycasts = true; cg.interactable = true; }
 
@@ -103,7 +113,7 @@ public class ScratchOverlayImage : MonoBehaviour
 
     void OnDisable()
     {
-        if (pauseGameWhileActive) Time.timeScale = 1f;
+        if (pauseGameWhileActive) Time.timeScale = _savedTimeScale; // 원래대로 복원
         _active = false;
         _paused = false;
         if (_timerCo != null) StopCoroutine(_timerCo);
@@ -228,52 +238,91 @@ public class ScratchOverlayImage : MonoBehaviour
         if (!_active) return;
         _active = false;
 
-        // 게임 재개
-        if (pauseGameWhileActive) Time.timeScale = 1f;
-
-        // 오버레이 즉시 비상호작용화(뒤 게임 입력 허용)
-        if (_img) _img.raycastTarget = false;
-
-        // 숨김/파괴
-        if (hideWhenCleared) StartCoroutine(FadeOutAndHide());
-        else _img.enabled = false;
-
+        // 성공 이벤트 즉시 알림
         onCleared?.Invoke();
         OnCleared?.Invoke();
+
+        // 타이머 중지 후 성공 플로우(정지 유지 → 페이드 → 대기 → 재개)
+        if (_timerCo != null) StopCoroutine(_timerCo);
+        StartCoroutine(SuccessFlow());
     }
 
     void Fail()
     {
         _active = false;
-        if (pauseGameWhileActive) Time.timeScale = 1f;
+        if (pauseGameWhileActive) Time.timeScale = _savedTimeScale; // 복원
         onFailed?.Invoke();
         OnFailed?.Invoke();
     }
 
-    IEnumerator FadeOutAndHide()
+    // 성공 후: 게임 완전 정지 & 터치 차단 유지 → (선택)페이드 → unscaled 대기 → 재개 + 숨김/파괴
+    IEnumerator SuccessFlow()
+    {
+        // 성공 후 멈춤 시간이 있을 때만 0으로 둔다 (없으면 바로 진행)
+        if (postClearFreezeSeconds > 0f)
+            Time.timeScale = 0f;
+
+        // 입력(터치) 완전 차단 유지
+        var cg = GetComponent<CanvasGroup>();
+        if (!cg) cg = gameObject.AddComponent<CanvasGroup>();
+        cg.interactable = false;
+        cg.blocksRaycasts = true;       // 투명해도 터치 막기
+        if (_img) _img.raycastTarget = true;
+
+        // (옵션) 페이드아웃: 알파만 0으로. 차단은 유지.
+        if (hideWhenCleared)
+            yield return StartCoroutine(FadeOutOnly());
+        else if (_img)
+            _img.enabled = false;
+
+        // 성공 후 정지 시간 대기 (unscaled)
+        if (postClearFreezeSeconds > 0f)
+        {
+            float t = 0f;
+            while (t < postClearFreezeSeconds)
+            {
+                t += Time.unscaledDeltaTime;
+                yield return null;
+            }
+        }
+
+        // 게임 재개(원래 스케일로 복원)
+        Time.timeScale = _savedTimeScale;
+
+        // 최종 정리: 입력 차단 해제 및 숨김/파괴
+        cg.blocksRaycasts = false;
+        if (_img) _img.raycastTarget = false;
+
+        if (hideWhenCleared)
+        {
+            if (destroyOnClear) Destroy(gameObject);
+            else gameObject.SetActive(false);
+        }
+    }
+
+    // 알파만 0으로 낮추는 전용 페이드(차단 상태는 유지)
+    IEnumerator FadeOutOnly()
     {
         var cg = GetComponent<CanvasGroup>();
         if (!cg) cg = gameObject.AddComponent<CanvasGroup>();
-        cg.blocksRaycasts = false;
+        cg.interactable = false;
+        cg.blocksRaycasts = true; // 여기서는 계속 차단 유지
         float from = cg.alpha;
+
         if (hideFadeOut <= 0f)
         {
             cg.alpha = 0f;
-        }
-        else
-        {
-            float t = 0f;
-            while (t < hideFadeOut)
-            {
-                t += Time.unscaledDeltaTime;
-                cg.alpha = Mathf.Lerp(from, 0f, t / hideFadeOut);
-                yield return null;
-            }
-            cg.alpha = 0f;
+            yield break;
         }
 
-        if (destroyOnClear) Destroy(gameObject);
-        else gameObject.SetActive(false);
+        float t = 0f;
+        while (t < hideFadeOut)
+        {
+            t += Time.unscaledDeltaTime;
+            cg.alpha = Mathf.Lerp(from, 0f, t / hideFadeOut);
+            yield return null;
+        }
+        cg.alpha = 0f;
     }
 
     // ===== Stop / Pause / Resume =====
@@ -297,7 +346,7 @@ public class ScratchOverlayImage : MonoBehaviour
     {
         if (asFail) { Fail(); return; }
         _active = false;
-        if (pauseGameWhileActive) Time.timeScale = 1f;
+        if (pauseGameWhileActive) Time.timeScale = _savedTimeScale; // 복원
         gameObject.SetActive(false);
     }
 

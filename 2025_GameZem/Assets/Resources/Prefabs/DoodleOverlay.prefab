@@ -168,8 +168,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1e53e16b16c8d24fb7d78d38c9f6b6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  requiredErasedRatio: 0.8
-  timeLimit: 50
+  requiredErasedRatio: 0.727
+  timeLimit: 2
   pauseGameWhileActive: 1
   hideWhenCleared: 0
   brushRadius: 112
@@ -182,3 +182,6 @@ MonoBehaviour:
   onFailed:
     m_PersistentCalls:
       m_Calls: []
+  hideFadeOut: 0.15
+  destroyOnClear: 0
+  postClearFreezeSeconds: 10
