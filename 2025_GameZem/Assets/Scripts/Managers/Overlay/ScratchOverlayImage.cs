@@ -27,6 +27,12 @@ public class ScratchOverlayImage : MonoBehaviour
     public System.Action OnCleared;
     public System.Action OnFailed;
 
+    [Header("Clear Behavior")]
+    [Tooltip("성공 시 페이드아웃 시간(0이면 바로 숨김)")]
+    [SerializeField] float hideFadeOut = 0.15f;
+    [Tooltip("성공 후 오브젝트를 아예 파괴할지 여부")]
+    [SerializeField] bool destroyOnClear = false;
+
     // ---- internals ----
     Image _img;
     Canvas _canvas;
@@ -37,7 +43,7 @@ public class ScratchOverlayImage : MonoBehaviour
     int _w, _h, _initialOpaque, _erasedCount;
     bool _active, _mouseHold;
 
-    // 타이머/일시정지 상태(★ 핵심: 경과시간을 필드로 유지)
+    // 타이머/일시정지 상태
     float _elapsedUnscaled = 0f;
     int _lastShownCountdown = -1;
     bool _paused = false;
@@ -57,8 +63,8 @@ public class ScratchOverlayImage : MonoBehaviour
             enabled = false; return;
         }
 
-        // 버튼 눌리도록 오버레이의 레이캐스트 차단
-        _img.raycastTarget = false;
+        // 오버레이 활성 중엔 배경 클릭을 막기 위해 Raycast Target ON
+        _img.raycastTarget = true;
 
         _workTex = MakeReadableCopy(_img.sprite.texture);
         _w = _workTex.width; _h = _workTex.height;
@@ -84,8 +90,13 @@ public class ScratchOverlayImage : MonoBehaviour
         if (pauseGameWhileActive) Time.timeScale = 0f;
         _active = true;
         _paused = false;
-        _elapsedUnscaled = 0f;     // ★ 타이머 리셋
+        _elapsedUnscaled = 0f;
         _lastShownCountdown = -1;
+
+        // 페이드 중 클릭 막힘 방지용 CanvasGroup 초기화(있으면)
+        var cg = GetComponent<CanvasGroup>();
+        if (cg) { cg.alpha = 1f; cg.blocksRaycasts = true; cg.interactable = true; }
+
         if (_timerCo != null) StopCoroutine(_timerCo);
         _timerCo = StartCoroutine(Timer());
     }
@@ -115,7 +126,7 @@ public class ScratchOverlayImage : MonoBehaviour
                 CollectInput();
 
                 if (debugText)
-                    debugText.text = $"Erased: {(GetErasedRatio()*100f):F0}%  Time: {_elapsedUnscaled:F1}s";
+                    debugText.text = $"Erased: {(GetErasedRatio() * 100f):F0}%  Time: {_elapsedUnscaled:F1}s";
 
                 if (GetErasedRatio() >= requiredErasedRatio) { Success(); yield break; }
             }
@@ -133,7 +144,7 @@ public class ScratchOverlayImage : MonoBehaviour
     void UpdateCountdownUI(int remain)
     {
         if (!countdownText) return;
-        if (_paused) return;                 // ★ 멈춘 동안 숫자 고정
+        if (_paused) return;
         if (remain == _lastShownCountdown) return;
 
         _lastShownCountdown = remain;
@@ -142,23 +153,13 @@ public class ScratchOverlayImage : MonoBehaviour
 
     void CollectInput()
     {
-
         if (_paused || !_active) return;
-
-        if (IsPointerOverUI()) return;       // 버튼 위 터치면 지우기 무시
 
 #if UNITY_EDITOR || UNITY_STANDALONE
         if (Input.GetMouseButtonDown(0)) _mouseHold = true;
-        if (Input.GetMouseButtonUp(0)) _mouseHold = false;
+        if (Input.GetMouseButtonUp(0))   _mouseHold = false;
         if (_mouseHold) EraseAt(Input.mousePosition);
 #endif
-
-
-        Debug.Log("_mouseHold: " + _mouseHold);
-
-        Debug.Log("Input.touchCount: " + Input.touchCount);
-
-
         for (int i = 0; i < Input.touchCount; i++)
         {
             var t = Input.GetTouch(i);
@@ -167,22 +168,8 @@ public class ScratchOverlayImage : MonoBehaviour
         }
     }
 
-    bool IsPointerOverUI()
-    {
-        if (EventSystem.current == null) return false;
-#if UNITY_EDITOR || UNITY_STANDALONE
-        if (EventSystem.current.IsPointerOverGameObject()) return true;
-#endif
-        for (int i = 0; i < Input.touchCount; i++)
-            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
-                return true;
-        return false;
-    }
-
     void EraseAt(Vector2 screenPos)
     {
-
-        Debug.Log("EraseAt: " + screenPos);
         RectTransform rt = (RectTransform)transform;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, screenPos, _eventCam, out var local))
             return;
@@ -211,7 +198,7 @@ public class ScratchOverlayImage : MonoBehaviour
             int dy = y - cy;
             for (int x = x0; x <= x1; x++)
             {
-                int dx = x - cx; int d2 = dx*dx + dy*dy;
+                int dx = x - cx; int d2 = dx * dx + dy * dy;
                 if (d2 > r2) continue;
 
                 int i = y * _w + x;
@@ -235,11 +222,22 @@ public class ScratchOverlayImage : MonoBehaviour
         return Mathf.Clamp01((float)_erasedCount / _initialOpaque);
     }
 
+    // ---- 결과 처리 ----
     void Success()
     {
+        if (!_active) return;
         _active = false;
-        if (hideWhenCleared) gameObject.SetActive(false);
+
+        // 게임 재개
         if (pauseGameWhileActive) Time.timeScale = 1f;
+
+        // 오버레이 즉시 비상호작용화(뒤 게임 입력 허용)
+        if (_img) _img.raycastTarget = false;
+
+        // 숨김/파괴
+        if (hideWhenCleared) StartCoroutine(FadeOutAndHide());
+        else _img.enabled = false;
+
         onCleared?.Invoke();
         OnCleared?.Invoke();
     }
@@ -252,11 +250,36 @@ public class ScratchOverlayImage : MonoBehaviour
         OnFailed?.Invoke();
     }
 
+    IEnumerator FadeOutAndHide()
+    {
+        var cg = GetComponent<CanvasGroup>();
+        if (!cg) cg = gameObject.AddComponent<CanvasGroup>();
+        cg.blocksRaycasts = false;
+        float from = cg.alpha;
+        if (hideFadeOut <= 0f)
+        {
+            cg.alpha = 0f;
+        }
+        else
+        {
+            float t = 0f;
+            while (t < hideFadeOut)
+            {
+                t += Time.unscaledDeltaTime;
+                cg.alpha = Mathf.Lerp(from, 0f, t / hideFadeOut);
+                yield return null;
+            }
+            cg.alpha = 0f;
+        }
+
+        if (destroyOnClear) Destroy(gameObject);
+        else gameObject.SetActive(false);
+    }
+
     // ===== Stop / Pause / Resume =====
     public void PauseOverlay()
     {
         _paused = true;
-        // 표시도 즉시 고정
         if (countdownText)
         {
             int remain = Mathf.CeilToInt(timeLimit - _elapsedUnscaled);
@@ -267,7 +290,7 @@ public class ScratchOverlayImage : MonoBehaviour
     public void ResumeOverlay()
     {
         _paused = false;
-        _lastShownCountdown = -1; // 재개 시 다음 프레임에 숫자 갱신
+        _lastShownCountdown = -1;
     }
 
     public void StopOverlay(bool asFail = false)
@@ -290,13 +313,22 @@ public class ScratchOverlayImage : MonoBehaviour
             for (int i = 0; i < _pixels.Length; i++)
                 if (_pixels[i].a > 25) _initialOpaque++;
         }
+
         _lastShownCountdown = -1;
         _paused = false;
         _elapsedUnscaled = 0f;
         if (countdownText) countdownText.text = "";
+
+        // 다시 켤 때 완전히 보이도록
+        var cg = GetComponent<CanvasGroup>();
+        if (cg) { cg.alpha = 1f; cg.blocksRaycasts = true; cg.interactable = true; }
+        if (_img) _img.enabled = true;
+        _img.raycastTarget = true;
+
         gameObject.SetActive(true);
     }
 
+    // ---- helpers ----
     static Texture2D MakeReadableCopy(Texture src)
     {
         int w = src.width, h = src.height;
