@@ -170,7 +170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requiredErasedRatio: 0.8
   timeLimit: 50
-  pauseGameWhileActive: 0
+  pauseGameWhileActive: 1
   hideWhenCleared: 0
   brushRadius: 112
   brushHardness: 0.657

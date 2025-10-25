@@ -17,11 +17,13 @@ public class CutSpawner : MonoBehaviour
     
     [Header("Cut Speed Settings")]
     public float baseCutSpeed = 10f; // 기본 컷 속도
+    public float normalSpeedCap = 2.5f; // 일반 상황 속도 상한선 (배수)
+    public float editorPressureSpeedCap = 4.0f; // 편집자 독촉 시 속도 상한선 (배수)
     
     [Header("Difficulty Settings")]
     public float difficultyIncreaseRate = 0.1f; // 난이도 증가율
     public float maxSpawnInterval = 0.5f; // 최소 스폰 간격
-    public float speedIncreaseRate = 0.05f; // 속도 증가율
+    public float speedIncreaseRate = 0.02f; // 속도 증가율 (초당 배수 증가량)
     
     [Header("Object Pooling")]
     public int poolSize = 10; // 풀 크기
@@ -49,6 +51,9 @@ public class CutSpawner : MonoBehaviour
     
     // 테이프 이벤트 플래그
     private bool nextCutHasTape = false;
+    
+    // 편집자 원고 독촉 이벤트
+    private bool isEditorPressureActive = false;
     
     // 타임라인 기반 스폰 시스템
     [Header("Timeline Settings")]
@@ -78,6 +83,9 @@ public class CutSpawner : MonoBehaviour
         if (currentStageIndex >= monthStages.Count) return;
         
         stageTimer += Time.deltaTime;
+        
+        // 시간에 따른 난이도 점진적 증가
+        IncreaseDifficulty();
         
         // 타임라인 체크 - 스폰할 이벤트가 있는지
         while (nextSpawnIndex < spawnTimeline.Count && spawnTimeline[nextSpawnIndex].spawnTime <= stageTimer)
@@ -118,7 +126,9 @@ public class CutSpawner : MonoBehaviour
             }
             else
             {
-                Debug.Log("All stages completed!");
+                // 모든 스테이지 완료 (엔딩)
+                Debug.Log("All stages completed! Game Ending!");
+                OnGameEnding();
             }
         }
     }
@@ -168,38 +178,40 @@ public class CutSpawner : MonoBehaviour
         // 스프레드시트 데이터에 맞춰 월별 스테이지 초기화
         if (monthStages.Count == 0)
         {
-            // 2006_9: Cut 5
+            // 2006_9: Cut 5, 없음
             monthStages.Add(new MonthStageData("2006_9", 5, new List<ObstacleSpawnInfo>()));
             
-            // 2006_10: Cut 5, A(물건던지기) 2
+            // 2006_10: Cut 5, A 2
             monthStages.Add(new MonthStageData("2006_10", 5, new List<ObstacleSpawnInfo> {
                 new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true)
             }));
             
-            // 2006_11: Cut 5, B(말풍선) 2
+            // 2006_11: Cut 5, B 2
             monthStages.Add(new MonthStageData("2006_11", 5, new List<ObstacleSpawnInfo> {
                 new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true)
             }));
             
-            // 2006_12: Cut 3, A 2, C(테이프) 1
+            // 2006_12: Cut 3, A 2, C 1
             monthStages.Add(new MonthStageData("2006_12", 3, new List<ObstacleSpawnInfo> {
                 new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
                 new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false)
             }));
             
-            // 2007_1: Cut 8, A 3, C 1 (편집자 원고 독촉 이벤트)
+            // 2007_1: Cut 8, A 3, C 1, Editor Pressure (편집자 원고 독촉 시작)
             monthStages.Add(new MonthStageData("2007_1", 8, new List<ObstacleSpawnInfo> {
                 new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 3, true),
-                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false)
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
             }));
             
-            // 2007_2: Cut 4, A 2, D(센세이션의발) 1
+            // 2007_2: Cut 4, A 2, D 1, Editor Pressure (편집자 원고 독촉 종료)
             monthStages.Add(new MonthStageData("2007_2", 4, new List<ObstacleSpawnInfo> {
                 new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
-                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 1, false)
+                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
             }));
             
-            // 2007_3: Cut 2, A 2 (조율의 낙서 이벤트)
+            // 2007_3: Cut 2, A 2 (조율의 낙서 시작/종료)
             monthStages.Add(new MonthStageData("2007_3", 2, new List<ObstacleSpawnInfo> {
                 new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true)
             }));
@@ -209,25 +221,210 @@ public class CutSpawner : MonoBehaviour
                 new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false)
             }));
             
-            // 2007_5: Cut 5, D 2
+            // 2007_5: Cut 5, D 1
             monthStages.Add(new MonthStageData("2007_5", 5, new List<ObstacleSpawnInfo> {
-                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 2, false)
-            }));
-            
-            // 2007_6: Cut 8, A 2, B 2, C 1 (편집자 원고 독촉 이벤트)
-            monthStages.Add(new MonthStageData("2007_6", 8, new List<ObstacleSpawnInfo> {
-                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
-                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true),
-                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false)
-            }));
-            
-            // 2007_7: Cut 4, A 2, D 1 (편집자 원고 독촉 이벤트 종료)
-            monthStages.Add(new MonthStageData("2007_7", 4, new List<ObstacleSpawnInfo> {
-                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
                 new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 1, false)
             }));
             
-            Debug.Log($"Default stages initialized: {monthStages.Count} stages");
+            // 2007_6: Cut 8, A 2, B 2, C 1, Editor Pressure (편집자 원고 독촉 시작)
+            monthStages.Add(new MonthStageData("2007_6", 8, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2007_7: Cut 4, C 1, Editor Pressure (편집자 원고 독촉 종료)
+            monthStages.Add(new MonthStageData("2007_7", 4, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2007_8: Cut 3, D 2
+            monthStages.Add(new MonthStageData("2007_8", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 2, false)
+            }));
+            
+            // 2007_9: Cut 5, A 2
+            monthStages.Add(new MonthStageData("2007_9", 5, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true)
+            }));
+            
+            // 2007_10: Cut 3, A 2, B 2
+            monthStages.Add(new MonthStageData("2007_10", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true)
+            }));
+            
+            // 2007_11: Cut 3, C 1
+            monthStages.Add(new MonthStageData("2007_11", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false)
+            }));
+            
+            // 2007_12: Cut 8, A 2, C 3, Editor Pressure (편집자 원고 독촉 시작)
+            monthStages.Add(new MonthStageData("2007_12", 8, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 3, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2008_1: Cut 4, A 2, D 1, Editor Pressure (편집자 원고 독촉 종료)
+            monthStages.Add(new MonthStageData("2008_1", 4, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2008_2: Cut 2, 없음 (조율의 낙서 시작/종료)
+            monthStages.Add(new MonthStageData("2008_2", 2, new List<ObstacleSpawnInfo>()));
+            
+            // 2008_3: Cut 4, C 2
+            monthStages.Add(new MonthStageData("2008_3", 4, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 2, false)
+            }));
+            
+            // 2008_4: Cut 3, A 2, C 1, D 1
+            monthStages.Add(new MonthStageData("2008_4", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 1, false)
+            }));
+            
+            // 2008_5: Cut 3, C 2
+            monthStages.Add(new MonthStageData("2008_5", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 2, false)
+            }));
+            
+            // 2008_6: Cut 8, A 2, B 2, C 1, Editor Pressure (편집자 원고 독촉 시작)
+            monthStages.Add(new MonthStageData("2008_6", 8, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2008_7: Cut 4, C 1, Editor Pressure (편집자 원고 독촉 종료)
+            monthStages.Add(new MonthStageData("2008_7", 4, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2008_8: Cut 3, D 2
+            monthStages.Add(new MonthStageData("2008_8", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 2, false)
+            }));
+            
+            // 2008_9: Cut 5, B 2
+            monthStages.Add(new MonthStageData("2008_9", 5, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true)
+            }));
+            
+            // 2008_10: Cut 3, A 2, B 2
+            monthStages.Add(new MonthStageData("2008_10", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true)
+            }));
+            
+            // 2008_11: Cut 5, C 2 (조율의 낙서 시작/종료)
+            monthStages.Add(new MonthStageData("2008_11", 5, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 2, false)
+            }));
+            
+            // 2008_12: Cut 8, A 2, C 3, Editor Pressure (편집자 원고 독촉 시작)
+            monthStages.Add(new MonthStageData("2008_12", 8, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 3, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2009_1 ~ 2019_12: 2007_2 ~ 2008_12 반복 (23개월 패턴, 132개월)
+            int repeatStartIndex = 5; // 2007_2가 시작하는 인덱스
+            int repeatEndIndex = 27; // 2008_12가 끝나는 인덱스
+            int repeatPatternLength = repeatEndIndex - repeatStartIndex + 1; // 23개월 패턴
+            
+            int totalMonthCount = 0; // 2009_1부터의 월 카운터
+            for (int year = 2009; year <= 2019; year++)
+            {
+                for (int month = 1; month <= 12; month++)
+                {
+                    // 23개월 패턴을 순환하며 반복
+                    int patternIndex = (totalMonthCount % repeatPatternLength) + repeatStartIndex;
+                    MonthStageData originalStage = monthStages[patternIndex];
+                    
+                    // 새로운 MonthStageData 생성 (깊은 복사)
+                    List<ObstacleSpawnInfo> copiedObstacles = new List<ObstacleSpawnInfo>();
+                    foreach (var obstacle in originalStage.obstacles)
+                    {
+                        copiedObstacles.Add(new ObstacleSpawnInfo(obstacle.type, obstacle.count, obstacle.randomPosition));
+                    }
+                    
+                    string monthName = $"{year}_{month}";
+                    monthStages.Add(new MonthStageData(monthName, originalStage.cutCount, copiedObstacles));
+                    
+                    // 디버그: EditorPressure가 포함되었는지 확인
+                    bool hasEditorPressure = copiedObstacles.Exists(o => o.type == ObstacleType.EditorPressure);
+                    if (hasEditorPressure)
+                    {
+                        Debug.Log($"[Stage Pattern Copy] {monthName}: EditorPressure copied from {originalStage.monthName}");
+                    }
+                    
+                    totalMonthCount++;
+                }
+            }
+            
+            // 2020_1: Cut 0, A 1, C 3, Editor Pressure (편집자 원고 독촉 종료)
+            monthStages.Add(new MonthStageData("2020_1", 0, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 1, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 3, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2020_2: Cut 0, B 2, C 3
+            monthStages.Add(new MonthStageData("2020_2", 0, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 3, false)
+            }));
+            
+            // 2020_3: Cut 3, D 2
+            monthStages.Add(new MonthStageData("2020_3", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.SenseisenFoot, 2, false)
+            }));
+            
+            // 2020_4: Cut 2, 없음 (조율의 낙서 시작/종료)
+            monthStages.Add(new MonthStageData("2020_4", 2, new List<ObstacleSpawnInfo>()));
+            
+            // 2020_5: Cut 8, A 2, B 2, C 1, Editor Pressure (편집자 원고 독촉 시작)
+            monthStages.Add(new MonthStageData("2020_5", 8, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.SpeechBubbleOverlay, 2, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 1, false),
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2020_6: Cut 2, Editor Pressure (편집자 원고 독촉 종료)
+            monthStages.Add(new MonthStageData("2020_6", 2, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.EditorPressure, 1, false)
+            }));
+            
+            // 2020_7: Cut 3, A 1, C 2 (게임 종료/엔딩)
+            monthStages.Add(new MonthStageData("2020_7", 3, new List<ObstacleSpawnInfo> {
+                new ObstacleSpawnInfo(ObstacleType.ThrowingObjects, 1, true),
+                new ObstacleSpawnInfo(ObstacleType.CutLineTape, 2, false)
+            }));
+            
+            // 전체 스테이지 중 EditorPressure가 포함된 스테이지 개수 확인
+            int editorPressureCount = 0;
+            foreach (var stage in monthStages)
+            {
+                if (stage.obstacles.Exists(o => o.type == ObstacleType.EditorPressure))
+                {
+                    editorPressureCount++;
+                    Debug.Log($"[Stage Check] {stage.monthName} has EditorPressure");
+                }
+            }
+            
+            Debug.Log($"Default stages initialized: {monthStages.Count} stages (2006_9 ~ 2020_7)");
+            Debug.Log($"Total stages with EditorPressure: {editorPressureCount}");
         }
     }
     
@@ -408,6 +605,32 @@ public class CutSpawner : MonoBehaviour
         Debug.Log("Next cut will have tape (double-click required)");
     }
     
+    // 편집자 원고 독촉 이벤트 토글
+    public void ToggleEditorPressure()
+    {
+        isEditorPressureActive = !isEditorPressureActive;
+        
+        if (isEditorPressureActive)
+        {
+            Debug.Log($"[Editor Pressure] STARTED! Speed cap increased to {editorPressureSpeedCap}x");
+        }
+        else
+        {
+            Debug.Log($"[Editor Pressure] ENDED! Speed cap returned to {normalSpeedCap}x");
+            // 현재 속도가 일반 상한선을 초과하면 서서히 감소하도록 조정
+            if (currentSpeedMultiplier > normalSpeedCap)
+            {
+                currentSpeedMultiplier = normalSpeedCap;
+            }
+        }
+    }
+    
+    // 편집자 원고 독촉 활성 상태 확인
+    public bool IsEditorPressureActive()
+    {
+        return isEditorPressureActive;
+    }
+    
     private Vector3 CalculateSpawnPosition()
     {
         float xPosition = 0;
@@ -459,10 +682,9 @@ public class CutSpawner : MonoBehaviour
         // 스폰 간격 감소 (더 빠른 스폰)
         currentSpawnInterval = Mathf.Max(maxSpawnInterval, currentSpawnInterval - difficultyIncreaseRate * Time.deltaTime);
         
-        // 속도 증가
-        currentSpeedMultiplier += speedIncreaseRate * Time.deltaTime;
-        
-        Debug.Log($"Difficulty increased. Spawn interval: {currentSpawnInterval:F2}, Speed multiplier: {currentSpeedMultiplier:F2}");
+        // 속도 증가 (상한선 적용)
+        float speedCap = isEditorPressureActive ? editorPressureSpeedCap : normalSpeedCap;
+        currentSpeedMultiplier = Mathf.Min(speedCap, currentSpeedMultiplier + speedIncreaseRate * Time.deltaTime);
     }
     
     private void OnCutSuccess()
@@ -580,6 +802,26 @@ public class CutSpawner : MonoBehaviour
     public float GetCurrentDifficulty()
     {
         return currentSpeedMultiplier;
+    }
+    
+    private void OnGameEnding()
+    {
+        // 모든 활성 컷과 방해 요소 제거
+        ClearAllCuts();
+        
+        if (obstacleManager != null)
+        {
+            obstacleManager.ClearAllObstacles();
+        }
+        
+        // GameManager에 게임 클리어 알림 (엔딩 패널 표시)
+        if (GameManager.Instance != null)
+        {
+            // GameManager의 GameCleared 메서드가 이미 AddMonth에서 호출되었을 것이므로
+            // 여기서는 추가 처리가 필요 없음
+        }
+        
+        Debug.Log("Game Ending: All cuts and obstacles cleared");
     }
     
     private void OnDestroy()

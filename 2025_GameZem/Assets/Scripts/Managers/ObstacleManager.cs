@@ -23,6 +23,9 @@ public class ObstacleManager : MonoBehaviour
     
     private List<GameObject> activeObstacles = new List<GameObject>();
     
+    // EditorPressure는 항상 하나만 존재
+    private GameObject currentEditorPressure = null;
+    
     private void Start()
     {
         // GameManager 이벤트 구독
@@ -73,6 +76,13 @@ public class ObstacleManager : MonoBehaviour
     // 외부에서 방해 요소를 스폰할 수 있는 public 메서드
     public void SpawnObstacleFromExternal(ObstacleType type, Vector2 position)
     {
+        // EditorPressure는 특별 처리 (토글 방식)
+        if (type == ObstacleType.EditorPressure)
+        {
+            HandleEditorPressureSpawn(position);
+            return;
+        }
+        
         ObstacleSpawnData spawnData = new ObstacleSpawnData
         {
             type = type,
@@ -90,6 +100,37 @@ public class ObstacleManager : MonoBehaviour
                 cutSpawner.SetNextCutHasTape();
             }
         }
+    }
+    
+    private void HandleEditorPressureSpawn(Vector2 position)
+    {
+        // 이미 EditorPressure가 존재하는지 확인
+        if (currentEditorPressure != null && currentEditorPressure.activeInHierarchy)
+        {
+            // 기존 인스턴스가 있으면 토글 처리 (disappear → 제거)
+            EditorPressureController controller = currentEditorPressure.GetComponent<EditorPressureController>();
+            if (controller != null)
+            {
+                Debug.Log("[ObstacleManager] EditorPressure already exists, toggling to disappear...");
+                controller.EndPressure();
+            }
+            currentEditorPressure = null;
+            return;
+        }
+        
+        // 새로 생성
+        ObstacleSpawnData spawnData = new ObstacleSpawnData
+        {
+            type = ObstacleType.EditorPressure,
+            position = position
+        };
+        
+        SpawnObstacle(spawnData);
+        
+        // 현재 인스턴스 저장
+        currentEditorPressure = activeObstacles[activeObstacles.Count - 1];
+        
+        Debug.Log("[ObstacleManager] EditorPressure spawned (new instance)");
     }
     
     private GameObject GetPrefabByType(ObstacleType type)
@@ -125,6 +166,7 @@ public class ObstacleManager : MonoBehaviour
         }
         
         activeObstacles.Clear();
+        currentEditorPressure = null; // EditorPressure 참조도 제거
         Debug.Log("All obstacles cleared");
     }
     
@@ -133,6 +175,13 @@ public class ObstacleManager : MonoBehaviour
         if (activeObstacles.Contains(obstacle))
         {
             activeObstacles.Remove(obstacle);
+            
+            // EditorPressure인 경우 참조 제거
+            if (obstacle == currentEditorPressure)
+            {
+                currentEditorPressure = null;
+            }
+            
             Destroy(obstacle);
             Debug.Log("Obstacle removed");
         }

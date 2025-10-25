@@ -1,0 +1,52 @@
+{ "skeleton": { "images": "C:/Users/cheen/OneDrive/바탕 화면/비버잼2025/스파인/int_warning/images/" },
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "arrow4", "bone": "root", "attachment": "arrow4" },
+	{ "name": "arrow3", "bone": "root", "attachment": "arrow3" },
+	{ "name": "arrow2", "bone": "root", "attachment": "arrow2" },
+	{ "name": "arrow1", "bone": "root", "attachment": "arrow1" },
+	{ "name": "bg", "bone": "root", "attachment": "bg" },
+	{ "name": "txt1", "bone": "root", "attachment": "txt1" },
+	{ "name": "txt2", "bone": "root", "attachment": "txt2" },
+	{ "name": "txt3", "bone": "root", "attachment": "txt3" },
+	{ "name": "warningsign", "bone": "root", "attachment": "warningsign" },
+	{ "name": "int_warningfx", "bone": "root", "attachment": "int_warningfx" }
+],
+"skins": {
+	"default": {
+		"arrow4": {
+			"arrow4": { "x": 984.5, "y": -1818, "width": 109, "height": 144 }
+		},
+		"arrow3": {
+			"arrow3": { "x": 228.5, "y": -2024.5, "width": 103, "height": 135 }
+		},
+		"arrow2": {
+			"arrow2": { "x": 108.5, "y": -1190, "width": 133, "height": 178 }
+		},
+		"arrow1": {
+			"arrow1": { "x": 948.5, "y": -210, "width": 115, "height": 152 }
+		},
+		"bg": {
+			"bg": { "x": 540, "y": -675, "width": 1030, "height": 380 }
+		},
+		"txt1": {
+			"txt1": { "x": 383, "y": -570, "width": 260, "height": 66 }
+		},
+		"txt2": {
+			"txt2": { "x": 959, "y": -570, "width": 100, "height": 66 }
+		},
+		"txt3": {
+			"txt3": { "x": 622, "y": -701, "width": 738, "height": 216 }
+		},
+		"warningsign": {
+			"warningsign": { "x": 153.5, "y": -659.5, "width": 183, "height": 167 }
+		},
+		"int_warningfx": {
+			"int_warningfx": { "x": 554, "y": -1195, "width": 1154, "height": 2464 }
+		}
+	}
+},
+"animations": { "animation": {} }
+}

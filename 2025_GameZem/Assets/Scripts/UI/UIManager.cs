@@ -10,6 +10,9 @@ public class UIManager : Singleton<UIManager>
     public TextMeshProUGUI comboText;
     public Slider comboSlider;
     
+    [Header("Progress UI")]
+    public Slider progressSlider; // 게임 진행도 슬라이더
+    
     [Header("Game Over UI")]
     public GameObject gameOverPanel;
     public TextMeshProUGUI finalScoreText;
@@ -85,6 +88,7 @@ public class UIManager : Singleton<UIManager>
             GameManager.Instance.OnGameOver += ShowGameOverScreen;
             GameManager.Instance.OnGameCleared += ShowGameClearedScreen;
             GameManager.Instance.OnComboAdded += AddCombo;
+            GameManager.Instance.OnProgressChanged += UpdateProgressDisplay;
         }
     }
     
@@ -113,6 +117,14 @@ public class UIManager : Singleton<UIManager>
         if (dateText != null)
         {
             dateText.text = date.ToString("yyyy. MM. dd");
+        }
+    }
+    
+    private void UpdateProgressDisplay(float progress)
+    {
+        if (progressSlider != null)
+        {
+            progressSlider.value = progress;
         }
     }
     
@@ -241,16 +253,8 @@ public class UIManager : Singleton<UIManager>
             // 최고 기록 표시
             if (bestScoreText != null)
             {
-                int bestScore = PlayerPrefs.GetInt("BestScore", 0);
-                int currentScore = GameManager.Instance.GetScore();
-                
-                if (currentScore > bestScore)
-                {
-                    bestScore = currentScore;
-                    PlayerPrefs.SetInt("BestScore", bestScore);
-                }
-                
-                bestScoreText.text = $"Best: {bestScore} days";
+                var bestScore = GameManager.Instance.GetBestRecord();
+                bestScoreText.text = $"최고 기록 {bestScore.date}";
             }
         }
     }
@@ -270,8 +274,8 @@ public class UIManager : Singleton<UIManager>
             // 총 소요 일수
             if (bestScoreText != null)
             {
-                int totalDays = GameManager.Instance.GetScore();
-                bestScoreText.text = $"Total: {totalDays} days";
+                var bestScore = GameManager.Instance.GetBestRecord();
+                bestScoreText.text = $"최고 기록 {bestScore.date}";
             }
         }
     }
@@ -345,6 +349,7 @@ public class UIManager : Singleton<UIManager>
             GameManager.Instance.OnGameOver -= ShowGameOverScreen;
             GameManager.Instance.OnGameCleared -= ShowGameClearedScreen;
             GameManager.Instance.OnComboAdded -= AddCombo;
+            GameManager.Instance.OnProgressChanged -= UpdateProgressDisplay;
         }
         
         base.OnDestroy();

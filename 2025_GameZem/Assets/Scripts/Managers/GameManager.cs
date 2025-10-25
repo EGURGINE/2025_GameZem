@@ -37,6 +37,7 @@ public class GameManager : Singleton<GameManager>
     public System.Action OnGameOver;
     public System.Action OnGameCleared; // 게임 클리어 이벤트
     public System.Action OnComboAdded;
+    public System.Action<float> OnProgressChanged; // 진행도 변경 이벤트
 
 
     // Save Data
@@ -76,6 +77,7 @@ public class GameManager : Singleton<GameManager>
         // 이벤트로 초기 상태 알림
         OnDateChanged?.Invoke(currentDate);
         OnLivesChanged?.Invoke(currentLives);
+        UpdateProgress();
     }
     
     private void StartGame()
@@ -107,14 +109,29 @@ public class GameManager : Singleton<GameManager>
         {
             currentDate = endDate;
             OnDateChanged?.Invoke(currentDate);
+            UpdateProgress();
             GameCleared();
         }
         else
         {
             currentDate = newDate;
             OnDateChanged?.Invoke(currentDate);
+            UpdateProgress();
             Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM. dd"));
         }
+    }
+    
+    private void UpdateProgress()
+    {
+        // 전체 기간 대비 현재 진행도 계산
+        double totalDays = (endDate - startDate).TotalDays;
+        double currentDays = (currentDate - startDate).TotalDays;
+        float progress = (float)(currentDays / totalDays);
+        
+        // 0~1 범위로 제한
+        progress = Mathf.Clamp01(progress);
+        
+        OnProgressChanged?.Invoke(progress);
     }
     
     // CutSpawner에서 호출할 공개 메서드

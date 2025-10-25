@@ -27,6 +27,7 @@ public class Cut : MonoBehaviour
     
     // Cut Line Reference
     private Transform cutLineTransform;
+    private RectTransform cutLineRectTransform; // 컷라인 RectTransform 캐싱
     private CutSpawner spawnerReference; // 스폰어 참조
 
     [Header("Cut Line Tape")]
@@ -35,7 +36,7 @@ public class Cut : MonoBehaviour
     
     // Double Click Detection
     private float lastClickTime = 0f;
-    private float doubleClickThreshold = 0.3f; // 더블클릭으로 인정하는 시간 간격 (초)
+    private float doubleClickThreshold = 0.5f; // 더블클릭으로 인정하는 시간 간격 (초)
 
     [Header("Spine")]
     private Spine.Unity.SkeletonAnimation skeletonAnimation;
@@ -224,6 +225,7 @@ public class Cut : MonoBehaviour
         if (cutLineObj != null)
         {
             cutLineTransform = cutLineObj.transform;
+            cutLineRectTransform = cutLineObj.GetComponent<RectTransform>(); // RectTransform 캐싱
         }
         
         // 랜덤 이미지 설정
@@ -235,13 +237,17 @@ public class Cut : MonoBehaviour
         // GameObject가 비활성화되면 Update 중단
         if (!gameObject.activeInHierarchy) return;
         
-        MoveCut();
-        
-        // MoveCut에서 비활성화될 수 있으므로 다시 체크
-        if (!gameObject.activeInHierarchy) return;
-        
         CheckCutLine();
         // 터치 입력은 CutSpawner에서 중앙 관리
+    }
+    
+    private void LateUpdate()
+    {
+        // GameObject가 비활성화되면 LateUpdate 중단
+        if (!gameObject.activeInHierarchy) return;
+        
+        // UI는 LateUpdate에서 움직이는 것이 더 부드러움
+        MoveCut();
     }
     
     public void Initialize(bool isTape,float speed, float xPosition, Action successCallback, Action missCallback)
@@ -296,6 +302,12 @@ public class Cut : MonoBehaviour
             cutLine.SetActive(true);
         }
         
+        // 컷라인 RectTransform 다시 캐싱 (오브젝트 풀링 대응)
+        if (cutLineTransform != null && cutLineRectTransform == null)
+        {
+            cutLineRectTransform = cutLineTransform.GetComponent<RectTransform>();
+        }
+        
         // 컷라인 대기 상태로 설정
         if (cutLineTransform != null)
         {
@@ -334,12 +346,14 @@ public class Cut : MonoBehaviour
     {
         if (rectTransform == null) return;
         
+        // 부드러운 움직임을 위한 최적화된 위치 업데이트
         Vector2 currentPos = rectTransform.anchoredPosition;
-        currentPos.y += moveSpeed * Time.deltaTime * 100f; // UI 스케일 조정
+        float deltaMove = moveSpeed * Time.deltaTime * 100f;
+        currentPos.y += deltaMove;
         rectTransform.anchoredPosition = currentPos;
         
-        // 화면 상단을 벗어나면 제거
-        if (currentPos.y > Screen.height + 100f)
+        // 화면 상단을 벗어나면 제거 (더 큰 여유를 둠)
+        if (currentPos.y > Screen.height * 0.6f + 200f)
         {
             if (!hasPassedCutLine)
             {
@@ -351,9 +365,9 @@ public class Cut : MonoBehaviour
     
     private void CheckCutLine()
     {
-        if (cutLineTransform == null || hasPassedCutLine) return;
+        if (cutLineRectTransform == null || hasPassedCutLine) return;
         
-        float cutLineY = cutLineTransform.GetComponent<RectTransform>().anchoredPosition.y;
+        float cutLineY = cutLineRectTransform.anchoredPosition.y;
         float cutY = rectTransform.anchoredPosition.y;
         
         // 이미지 상단 기준으로 계산 (이미지 높이의 절반을 더함)
@@ -388,9 +402,9 @@ public class Cut : MonoBehaviour
     public bool IsInCutLineRange()
     {
         if (!isWaitingForTouch || hasPassedCutLine) return false;
-        if (cutLineTransform == null) return false;
+        if (cutLineRectTransform == null) return false;
         
-        float cutLineY = cutLineTransform.GetComponent<RectTransform>().anchoredPosition.y;
+        float cutLineY = cutLineRectTransform.anchoredPosition.y;
         float cutY = rectTransform.anchoredPosition.y;
         float cutTopY = cutY + (rectTransform.sizeDelta.y / 2f);
         
@@ -442,7 +456,7 @@ public class Cut : MonoBehaviour
     private void ProcessCutInput()
     {
         // 컷라인 범위 체크
-        float cutLineY = cutLineTransform.GetComponent<RectTransform>().anchoredPosition.y;
+        float cutLineY = cutLineRectTransform.anchoredPosition.y;
         float cutY = rectTransform.anchoredPosition.y;
         float cutTopY = cutY + (rectTransform.sizeDelta.y / 2f);
         
