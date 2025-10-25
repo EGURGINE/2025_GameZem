@@ -2,44 +2,46 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
+using UnityEngine.EventSystems;
 
-/// UI Image 위에 올린 스프라이트를 손가락/마우스로 지우는 오버레이
-/// - 원본 텍스처 Read/Write 꺼져 있어도 RenderTexture 경유 복사로 안전 동작
-/// - Canvas 모드(Overlay/Camera/World) 모두 좌표 정확
 [RequireComponent(typeof(Image))]
 public class ScratchOverlayImage : MonoBehaviour
 {
     [Header("Gameplay")]
-    [Range(0.2f, 1f)] public float requiredErasedRatio = 0.8f; // 성공 기준 (80%)
-    [Min(0.5f)] public float timeLimit = 3f;                   // 제한 시간(초, 실시간)
-    public bool pauseGameWhileActive = true;                   // 활성화 중 Time.timeScale=0
-    public bool hideWhenCleared = true;                        // 성공 시 오브젝트 숨김
+    [Range(0.2f, 1f)] public float requiredErasedRatio = 0.8f;
+    [Min(0.5f)] public float timeLimit = 3f;
+    public bool pauseGameWhileActive = true;
+    public bool hideWhenCleared = true;
 
     [Header("Brush")]
-    [Range(5, 256)] public int brushRadius = 48;               // 브러시 반경(px)
-    [Range(0f, 1f)] public float brushHardness = 1f;           // 1=딱딱, 0=부드럽게
+    [Range(5, 256)] public int brushRadius = 48;
+    [Range(0f, 1f)] public float brushHardness = 1f;
 
-    [Header("Debug (Optional)")]
+    [Header("UI (Optional)")]
     public Text debugText;
+    public Text countdownText;
 
-    [Header("Events (Inspector에서 연결 가능)")]
+    [Header("Events")]
     public UnityEvent onCleared;
     public UnityEvent onFailed;
-
-    // 코드에서 구독하고 싶을 때
     public System.Action OnCleared;
     public System.Action OnFailed;
 
+    // ---- internals ----
     Image _img;
     Canvas _canvas;
     Camera _eventCam;
 
-    Texture2D _workTex;            // 작업용 복사 텍스처(RGBA32)
+    Texture2D _workTex;
     Color32[] _pixels, _original;
-    int _w, _h;
-    int _initialOpaque;            // 초기 불투명 픽셀 수(알파>10%)
-    int _erasedCount;              // 완전 0이 된 픽셀 누계
+    int _w, _h, _initialOpaque, _erasedCount;
     bool _active, _mouseHold;
+
+    // 타이머/일시정지 상태(★ 핵심: 경과시간을 필드로 유지)
+    float _elapsedUnscaled = 0f;
+    int _lastShownCountdown = -1;
+    bool _paused = false;
+    Coroutine _timerCo;
 
     void Awake()
     {
@@ -55,11 +57,12 @@ public class ScratchOverlayImage : MonoBehaviour
             enabled = false; return;
         }
 
-        // Read/Write 여부 무관하게 읽기 가능한 복사본 생성
+        // 버튼 눌리도록 오버레이의 레이캐스트 차단
+        _img.raycastTarget = false;
+
         _workTex = MakeReadableCopy(_img.sprite.texture);
         _w = _workTex.width; _h = _workTex.height;
 
-        // 작업 텍스처로 새 스프라이트 교체 (원본 보호)
         float ppu = _img.sprite.pixelsPerUnit > 0 ? _img.sprite.pixelsPerUnit : 100f;
         _img.sprite = Sprite.Create(_workTex, new Rect(0, 0, _w, _h), new Vector2(0.5f, 0.5f), ppu);
 
@@ -71,43 +74,78 @@ public class ScratchOverlayImage : MonoBehaviour
             if (_pixels[i].a > 25) _initialOpaque++;
 
         _erasedCount = 0;
+
         if (debugText) debugText.text = "Erased: 0%  Time: 0.0s";
+        if (countdownText) countdownText.text = "";
     }
 
     void OnEnable()
     {
         if (pauseGameWhileActive) Time.timeScale = 0f;
         _active = true;
-        StartCoroutine(Timer());
+        _paused = false;
+        _elapsedUnscaled = 0f;     // ★ 타이머 리셋
+        _lastShownCountdown = -1;
+        if (_timerCo != null) StopCoroutine(_timerCo);
+        _timerCo = StartCoroutine(Timer());
     }
 
     void OnDisable()
     {
         if (pauseGameWhileActive) Time.timeScale = 1f;
         _active = false;
+        _paused = false;
+        if (_timerCo != null) StopCoroutine(_timerCo);
+        if (countdownText) countdownText.text = "";
     }
 
     IEnumerator Timer()
     {
-        float t = 0f;
-        while (_active && t < timeLimit)
-        {
-            t += Time.unscaledDeltaTime;       // timeScale=0에서도 흐르게
-            CollectInput();
-            if (debugText) debugText.text = $"Erased: {(GetErasedRatio()*100f):F0}%  Time: {t:F1}s";
+        UpdateCountdownUI(Mathf.CeilToInt(timeLimit));
 
-            if (GetErasedRatio() >= requiredErasedRatio) { Success(); yield break; }
+        while (_active && _elapsedUnscaled < timeLimit)
+        {
+            if (!_paused)
+            {
+                _elapsedUnscaled += Time.unscaledDeltaTime;
+
+                int remain = Mathf.CeilToInt(timeLimit - _elapsedUnscaled);
+                UpdateCountdownUI(Mathf.Max(remain, 0));
+
+                CollectInput();
+
+                if (debugText)
+                    debugText.text = $"Erased: {(GetErasedRatio()*100f):F0}%  Time: {_elapsedUnscaled:F1}s";
+
+                if (GetErasedRatio() >= requiredErasedRatio) { Success(); yield break; }
+            }
             yield return null;
         }
+
         if (_active)
         {
+            UpdateCountdownUI(0);
             if (GetErasedRatio() >= requiredErasedRatio) Success();
             else Fail();
         }
     }
 
+    void UpdateCountdownUI(int remain)
+    {
+        if (!countdownText) return;
+        if (_paused) return;                 // ★ 멈춘 동안 숫자 고정
+        if (remain == _lastShownCountdown) return;
+
+        _lastShownCountdown = remain;
+        countdownText.text = (remain >= 1) ? remain.ToString() : "";
+    }
+
     void CollectInput()
     {
+        if (_paused || !_active) return;
+
+        if (IsPointerOverUI()) return;       // 버튼 위 터치면 지우기 무시
+
 #if UNITY_EDITOR || UNITY_STANDALONE
         if (Input.GetMouseButtonDown(0)) _mouseHold = true;
         if (Input.GetMouseButtonUp(0)) _mouseHold = false;
@@ -119,6 +157,18 @@ public class ScratchOverlayImage : MonoBehaviour
             if (t.phase == TouchPhase.Began || t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary)
                 EraseAt(t.position);
         }
+    }
+
+    bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+#endif
+        for (int i = 0; i < Input.touchCount; i++)
+            if (EventSystem.current.IsPointerOverGameObject(Input.GetTouch(i).fingerId))
+                return true;
+        return false;
     }
 
     void EraseAt(Vector2 screenPos)
@@ -158,7 +208,7 @@ public class ScratchOverlayImage : MonoBehaviour
                 byte a0 = _pixels[i].a;
                 if (a0 == 0) continue;
 
-                float norm = Mathf.Sqrt(d2) / rad;     // 0~1
+                float norm = Mathf.Sqrt(d2) / rad;
                 float strength = Mathf.Clamp01(1f - norm);
                 strength = Mathf.Lerp(strength, 1f, brushHardness);
 
@@ -182,7 +232,6 @@ public class ScratchOverlayImage : MonoBehaviour
         if (pauseGameWhileActive) Time.timeScale = 1f;
         onCleared?.Invoke();
         OnCleared?.Invoke();
-        Debug.Log($"[ScratchOverlay] Cleared ({GetErasedRatio():P0})");
     }
 
     void Fail()
@@ -191,10 +240,34 @@ public class ScratchOverlayImage : MonoBehaviour
         if (pauseGameWhileActive) Time.timeScale = 1f;
         onFailed?.Invoke();
         OnFailed?.Invoke();
-        Debug.Log($"[ScratchOverlay] Failed ({GetErasedRatio():P0})");
     }
 
-    /// 외부에서 다시 띄우고 싶을 때. reset=true면 원본으로 복원
+    // ===== Stop / Pause / Resume =====
+    public void PauseOverlay()
+    {
+        _paused = true;
+        // 표시도 즉시 고정
+        if (countdownText)
+        {
+            int remain = Mathf.CeilToInt(timeLimit - _elapsedUnscaled);
+            countdownText.text = (remain >= 1) ? remain.ToString() : "";
+        }
+    }
+
+    public void ResumeOverlay()
+    {
+        _paused = false;
+        _lastShownCountdown = -1; // 재개 시 다음 프레임에 숫자 갱신
+    }
+
+    public void StopOverlay(bool asFail = false)
+    {
+        if (asFail) { Fail(); return; }
+        _active = false;
+        if (pauseGameWhileActive) Time.timeScale = 1f;
+        gameObject.SetActive(false);
+    }
+
     public void Show(bool reset = true)
     {
         if (reset && _original != null && _original.Length == (_pixels?.Length ?? 0))
@@ -207,10 +280,13 @@ public class ScratchOverlayImage : MonoBehaviour
             for (int i = 0; i < _pixels.Length; i++)
                 if (_pixels[i].a > 25) _initialOpaque++;
         }
+        _lastShownCountdown = -1;
+        _paused = false;
+        _elapsedUnscaled = 0f;
+        if (countdownText) countdownText.text = "";
         gameObject.SetActive(true);
     }
 
-    // Read/Write 꺼진 텍스처도 안전하게 복사(RGBA32)
     static Texture2D MakeReadableCopy(Texture src)
     {
         int w = src.width, h = src.height;
@@ -226,5 +302,5 @@ public class ScratchOverlayImage : MonoBehaviour
         RenderTexture.active = prev;
         RenderTexture.ReleaseTemporary(rt);
         return tex;
-        }
+    }
 }
