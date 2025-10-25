@@ -56,6 +56,12 @@ public class ScratchOverlayImage : MonoBehaviour
     // 원래 타임스케일 저장 (중요!)
     float _savedTimeScale = 1f;
 
+    // 실패시 유지용 플래그(Disable 시 타임스케일 복원 금지)
+    bool _keepPausedOnDisable = false;
+
+    // 한 번이라도 유저가 터치/클릭했는지
+    bool _touchedOnce = false;
+
     void Awake()
     {
         _img = GetComponent<Image>();
@@ -102,6 +108,8 @@ public class ScratchOverlayImage : MonoBehaviour
         _paused = false;
         _elapsedUnscaled = 0f;
         _lastShownCountdown = -1;
+        _keepPausedOnDisable = false;
+        _touchedOnce = false;
 
         // 페이드/입력차단 제어용 CanvasGroup 초기화(있으면)
         var cg = GetComponent<CanvasGroup>();
@@ -113,7 +121,10 @@ public class ScratchOverlayImage : MonoBehaviour
 
     void OnDisable()
     {
-        if (pauseGameWhileActive) Time.timeScale = _savedTimeScale; // 원래대로 복원
+        // 실패로 인해 '멈춘 상태 유지'가 필요한 경우 복원하지 않음
+        if (!_keepPausedOnDisable)
+            Time.timeScale = _savedTimeScale;
+
         _active = false;
         _paused = false;
         if (_timerCo != null) StopCoroutine(_timerCo);
@@ -138,16 +149,24 @@ public class ScratchOverlayImage : MonoBehaviour
                 if (debugText)
                     debugText.text = $"Erased: {(GetErasedRatio() * 100f):F0}%  Time: {_elapsedUnscaled:F1}s";
 
-                if (GetErasedRatio() >= requiredErasedRatio) { Success(); yield break; }
+                if (GetErasedRatio() >= requiredErasedRatio)
+                {
+                    Success();
+                    yield break;
+                }
             }
             yield return null;
         }
 
         if (_active)
         {
+            // 시간 종료 시: (1) 전혀 터치가 없었거나 (2) 지운 비율 미달 → 실패 처리
             UpdateCountdownUI(0);
-            if (GetErasedRatio() >= requiredErasedRatio) Success();
-            else Fail();
+
+            if (!_touchedOnce || GetErasedRatio() < requiredErasedRatio)
+                Fail();
+            else
+                Success(); // (안전망) 거의 없겠지만 임계치 경계에서 성공 판정
         }
     }
 
@@ -166,13 +185,18 @@ public class ScratchOverlayImage : MonoBehaviour
         if (_paused || !_active) return;
 
 #if UNITY_EDITOR || UNITY_STANDALONE
-        if (Input.GetMouseButtonDown(0)) _mouseHold = true;
+        if (Input.GetMouseButtonDown(0))
+        {
+            _mouseHold = true;
+            _touchedOnce = true; // 첫 입력 기록
+        }
         if (Input.GetMouseButtonUp(0))   _mouseHold = false;
         if (_mouseHold) EraseAt(Input.mousePosition);
 #endif
         for (int i = 0; i < Input.touchCount; i++)
         {
             var t = Input.GetTouch(i);
+            if (t.phase == TouchPhase.Began) _touchedOnce = true; // 첫 터치 기록
             if (t.phase == TouchPhase.Began || t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary)
                 EraseAt(t.position);
         }
@@ -249,16 +273,27 @@ public class ScratchOverlayImage : MonoBehaviour
 
     void Fail()
     {
+        if (!_active) return;
         _active = false;
-        if (pauseGameWhileActive) Time.timeScale = _savedTimeScale; // 복원
+
+        // 요구사항: (1) 오버레이 제거 (2) 게임은 멈춘 상태 유지
+        // 타임스케일 0으로 고정하고 Disable에서 복원 못하게 플래그 설정
+        Time.timeScale = 0f;
+        _keepPausedOnDisable = true;
+
         onFailed?.Invoke();
         OnFailed?.Invoke();
+
+        if (_timerCo != null) StopCoroutine(_timerCo);
+
+        // 오버레이 즉시 제거(낙서 사진 제거)
+        Destroy(gameObject);
     }
 
     // 성공 후: 게임 완전 정지 & 터치 차단 유지 → (선택)페이드 → unscaled 대기 → 재개 + 숨김/파괴
     IEnumerator SuccessFlow()
     {
-        // 성공 후 멈춤 시간이 있을 때만 0으로 둔다 (없으면 바로 진행)
+        // 성공 후 멈춤 시간이 있을 때 0으로 멈춤
         if (postClearFreezeSeconds > 0f)
             Time.timeScale = 0f;
 
@@ -346,7 +381,8 @@ public class ScratchOverlayImage : MonoBehaviour
     {
         if (asFail) { Fail(); return; }
         _active = false;
-        if (pauseGameWhileActive) Time.timeScale = _savedTimeScale; // 복원
+        // 정상 종료는 원래 스케일로 복원
+        Time.timeScale = _savedTimeScale;
         gameObject.SetActive(false);
     }
 
@@ -366,6 +402,7 @@ public class ScratchOverlayImage : MonoBehaviour
         _lastShownCountdown = -1;
         _paused = false;
         _elapsedUnscaled = 0f;
+        _touchedOnce = false;
         if (countdownText) countdownText.text = "";
 
         // 다시 켤 때 완전히 보이도록

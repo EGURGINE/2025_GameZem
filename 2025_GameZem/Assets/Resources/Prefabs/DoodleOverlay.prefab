@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requiredErasedRatio: 0.727
-  timeLimit: 2
+  timeLimit: 10
   pauseGameWhileActive: 1
   hideWhenCleared: 0
   brushRadius: 112
@@ -183,5 +183,5 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   hideFadeOut: 0.15
-  destroyOnClear: 0
-  postClearFreezeSeconds: 10
+  destroyOnClear: 1
+  postClearFreezeSeconds: 2
