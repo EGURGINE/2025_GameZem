@@ -50,25 +50,48 @@ public class Cut : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
         cutImage = GetComponent<Image>();
         
-        // Spine 애니메이션 컴포넌트들 찾기 (여러 개 지원)
-        skeletonAnimations = GetComponentsInChildren<Spine.Unity.SkeletonAnimation>();
-        skeletonGraphics = GetComponentsInChildren<Spine.Unity.SkeletonGraphic>();
+        // Spine 애니메이션 컴포넌트들 찾기 (여러 개 지원) - null safety 추가
+        try
+        {
+            skeletonAnimations = GetComponentsInChildren<Spine.Unity.SkeletonAnimation>();
+            skeletonGraphics = GetComponentsInChildren<Spine.Unity.SkeletonGraphic>();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[Cut] Spine 컴포넌트 검색 중 오류: {e.Message}");
+            skeletonAnimations = new Spine.Unity.SkeletonAnimation[0];
+            skeletonGraphics = new Spine.Unity.SkeletonGraphic[0];
+        }
         
         if (skeletonAnimations != null && skeletonAnimations.Length > 0)
         {
             Debug.Log($"[Cut] SkeletonAnimation {skeletonAnimations.Length}개 찾음");
             for (int i = 0; i < skeletonAnimations.Length; i++)
             {
-                if (skeletonAnimations[i] != null)
-                {
-                    Debug.Log($"[Cut] SkeletonAnimation[{i}]: {skeletonAnimations[i].gameObject.name}");
-                    Debug.Log($"[Cut] 사용 가능한 애니메이션 목록:");
-                    var data = skeletonAnimations[i].Skeleton.Data;
-                    foreach (var anim in data.Animations)
-                    {
-                        Debug.Log($"  - {anim.Name}");
-                    }
-                }
+                        if (skeletonAnimations[i] != null)
+                        {
+                            Debug.Log($"[Cut] SkeletonAnimation[{i}]: {skeletonAnimations[i].gameObject.name}");
+                            Debug.Log($"[Cut] 사용 가능한 애니메이션 목록:");
+                            try
+                            {
+                                var data = skeletonAnimations[i].Skeleton?.Data;
+                                if (data != null)
+                                {
+                                    foreach (var anim in data.Animations)
+                                    {
+                                        Debug.Log($"  - {anim.Name}");
+                                    }
+                                }
+                                else
+                                {
+                                    Debug.LogWarning($"[Cut] SkeletonAnimation[{i}] Skeleton.Data가 null입니다.");
+                                }
+                            }
+                            catch (System.Exception e)
+                            {
+                                Debug.LogError($"[Cut] SkeletonAnimation[{i}] 데이터 접근 중 오류: {e.Message}");
+                            }
+                        }
             }
             SetIdleAnimation();
         }
@@ -77,16 +100,30 @@ public class Cut : MonoBehaviour
             Debug.Log($"[Cut] SkeletonGraphic {skeletonGraphics.Length}개 찾음");
             for (int i = 0; i < skeletonGraphics.Length; i++)
             {
-                if (skeletonGraphics[i] != null)
-                {
-                    Debug.Log($"[Cut] SkeletonGraphic[{i}]: {skeletonGraphics[i].gameObject.name}");
-                    Debug.Log($"[Cut] 사용 가능한 애니메이션 목록:");
-                    var data = skeletonGraphics[i].Skeleton.Data;
-                    foreach (var anim in data.Animations)
-                    {
-                        Debug.Log($"  - {anim.Name}");
-                    }
-                }
+                        if (skeletonGraphics[i] != null)
+                        {
+                            Debug.Log($"[Cut] SkeletonGraphic[{i}]: {skeletonGraphics[i].gameObject.name}");
+                            Debug.Log($"[Cut] 사용 가능한 애니메이션 목록:");
+                            try
+                            {
+                                var data = skeletonGraphics[i].Skeleton?.Data;
+                                if (data != null)
+                                {
+                                    foreach (var anim in data.Animations)
+                                    {
+                                        Debug.Log($"  - {anim.Name}");
+                                    }
+                                }
+                                else
+                                {
+                                    Debug.LogWarning($"[Cut] SkeletonGraphic[{i}] Skeleton.Data가 null입니다.");
+                                }
+                            }
+                            catch (System.Exception e)
+                            {
+                                Debug.LogError($"[Cut] SkeletonGraphic[{i}] 데이터 접근 중 오류: {e.Message}");
+                            }
+                        }
             }
             SetIdleAnimation();
         }
@@ -126,9 +163,17 @@ public class Cut : MonoBehaviour
                             
                             // 애니메이션 존재 여부 확인
                             string animToPlay = idleAnimationName;
-                            if (skeletonAnimations[i].Skeleton.Data.FindAnimation(idleAnimationName) == null)
+                            try
                             {
-                                Debug.LogWarning($"[Cut] SkeletonAnimation[{i}] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 'idle'로 대체합니다.");
+                                if (skeletonAnimations[i].Skeleton?.Data?.FindAnimation(idleAnimationName) == null)
+                                {
+                                    Debug.LogWarning($"[Cut] SkeletonAnimation[{i}] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 'idle'로 대체합니다.");
+                                    animToPlay = "idle";
+                                }
+                            }
+                            catch (System.Exception e)
+                            {
+                                Debug.LogError($"[Cut] SkeletonAnimation[{i}] 애니메이션 검색 중 오류: {e.Message}");
                                 animToPlay = "idle";
                             }
                             
@@ -150,22 +195,30 @@ public class Cut : MonoBehaviour
                             
                             // 애니메이션 존재 여부 확인
                             string animToPlay = idleAnimationName;
-                            if (skeletonGraphics[i].Skeleton.Data.FindAnimation(idleAnimationName) == null)
+                            try
                             {
-                                Debug.LogWarning($"[Cut] SkeletonGraphic[{i}] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 사용 가능한 애니메이션을 찾는 중...");
-                                
-                                // 사용 가능한 애니메이션 목록에서 첫 번째 애니메이션 사용
-                                var animations = skeletonGraphics[i].Skeleton.Data.Animations;
-                                if (animations.Count > 0)
+                                if (skeletonGraphics[i].Skeleton?.Data?.FindAnimation(idleAnimationName) == null)
                                 {
-                                    animToPlay = animations.Items[0].Name;
-                                    Debug.Log($"[Cut] SkeletonGraphic[{i}] '{animToPlay}' 애니메이션으로 대체합니다.");
+                                    Debug.LogWarning($"[Cut] SkeletonGraphic[{i}] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 사용 가능한 애니메이션을 찾는 중...");
+                                    
+                                    // 사용 가능한 애니메이션 목록에서 첫 번째 애니메이션 사용
+                                    var animations = skeletonGraphics[i].Skeleton?.Data?.Animations;
+                                    if (animations != null && animations.Count > 0)
+                                    {
+                                        animToPlay = animations.Items[0].Name;
+                                        Debug.Log($"[Cut] SkeletonGraphic[{i}] '{animToPlay}' 애니메이션으로 대체합니다.");
+                                    }
+                                    else
+                                    {
+                                        Debug.LogError($"[Cut] SkeletonGraphic[{i}] 사용 가능한 애니메이션이 없습니다!");
+                                        continue;
+                                    }
                                 }
-                                else
-                                {
-                                    Debug.LogError($"[Cut] SkeletonGraphic[{i}] 사용 가능한 애니메이션이 없습니다!");
-                                    continue;
-                                }
+                            }
+                            catch (System.Exception e)
+                            {
+                                Debug.LogError($"[Cut] SkeletonGraphic[{i}] 애니메이션 검색 중 오류: {e.Message}");
+                                animToPlay = "idle";
                             }
                             
                             var trackEntry = skeletonGraphics[i].AnimationState.SetAnimation(0, animToPlay, false);
