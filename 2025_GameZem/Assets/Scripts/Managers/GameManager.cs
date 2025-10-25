@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -43,6 +44,7 @@ public class GameManager : Singleton<GameManager>
     private const string SAVE_KEY = "GameRecords";
     private const int MAX_RECORDS = 5; // 최대 저장 개수
     public List<SaveData> saveDataList = new List<SaveData>();
+    public Dictionary<string, SaveData> recordsDictionary = new Dictionary<string, SaveData>();
     
     protected override void Awake()
     {
@@ -101,11 +103,11 @@ public class GameManager : Singleton<GameManager>
         if (timeSinceLastIncrease >= monthIncreaseInterval)
         {
             timeSinceLastIncrease = 0f;
-            AddMonth();
+            //AddMonth();
         }
     }
     
-    private void AddMonth()
+    /*private void AddMonth()
     {
         // 1개월 추가
         System.DateTime newDate = currentDate.AddMonths(1);
@@ -123,7 +125,7 @@ public class GameManager : Singleton<GameManager>
             OnDateChanged?.Invoke(currentDate);
             Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM. dd"));
         }
-    }
+    }*/
     
     // CutSpawner에서 호출할 공개 메서드
     public void OnCutSuccessCallback()
@@ -189,11 +191,7 @@ public class GameManager : Singleton<GameManager>
         saveDataList.Add(saveData);
         SaveRecords();
         
-        // 게임 오버 효과음 재생
-        // if (SoundManager.Instance != null)
-        // {
-        //     SoundManager.Instance.PlayGameOverSound();
-        // }
+        TestScore.Instance?.ManualSyncRecords();
     }
     
     private void GameCleared()
@@ -218,6 +216,8 @@ public class GameManager : Singleton<GameManager>
         };
         saveDataList.Add(saveData);
         SaveRecords();
+
+        TestScore.Instance?.ManualSyncRecords();
         
         Debug.Log("Game Cleared! Reached: " + endDate.ToString("yyyy. MM. dd"));
         
@@ -266,29 +266,48 @@ public class GameManager : Singleton<GameManager>
         StartGame();
     }
     
-    // 기록 저장
+    // 기록 저장 (딕셔너리 기반)
     private void SaveRecords()
     {
-        // 시간 기준으로 내림차순 정렬 (오래 버틴 순)
-        saveDataList.Sort((a, b) => b.time.CompareTo(a.time));
+        // 새 기록을 딕셔너리에 추가 (날짜+시간을 키로 사용)
+        SaveData latestRecord = saveDataList[saveDataList.Count - 1];
+        string recordKey = $"{latestRecord.date}_{latestRecord.time:F2}";
         
-        // 상위 5개만 유지
-        if (saveDataList.Count > MAX_RECORDS)
+        if (!recordsDictionary.ContainsKey(recordKey))
         {
-            saveDataList.RemoveRange(MAX_RECORDS, saveDataList.Count - MAX_RECORDS);
+            recordsDictionary[recordKey] = latestRecord;
         }
         
+        // 딕셔너리를 리스트로 변환하여 정렬
+        List<SaveData> sortedRecords = new List<SaveData>(recordsDictionary.Values);
+        sortedRecords.Sort((a, b) => b.time.CompareTo(a.time)); // 시간 기준 내림차순 정렬
+        
+        // 상위 5개만 유지
+        if (sortedRecords.Count > MAX_RECORDS)
+        {
+            sortedRecords = sortedRecords.Take(MAX_RECORDS).ToList();
+        }
+        
+        // 딕셔너리 업데이트
+        recordsDictionary.Clear();
+        foreach (var record in sortedRecords)
+        {
+            string key = $"{record.date}_{record.time:F2}";
+            recordsDictionary[key] = record;
+        }
+        
+        // 딕셔너리를 JSON으로 저장
         SaveDataList dataList = new SaveDataList();
-        dataList.records = saveDataList;
+        dataList.records = sortedRecords;
         
         string json = JsonUtility.ToJson(dataList, true);
         PlayerPrefs.SetString(SAVE_KEY, json);
         PlayerPrefs.Save();
         
-        Debug.Log("Records saved: " + saveDataList.Count + " records (top " + MAX_RECORDS + ")");
+        Debug.Log($"Records saved to dictionary: {recordsDictionary.Count} records (top {MAX_RECORDS})");
     }
     
-    // 기록 불러오기
+    // 기록 불러오기 (딕셔너리 기반)
     private void LoadRecords()
     {
         if (PlayerPrefs.HasKey(SAVE_KEY))
@@ -298,7 +317,16 @@ public class GameManager : Singleton<GameManager>
             if (dataList != null && dataList.records != null)
             {
                 saveDataList = dataList.records;
-                Debug.Log("Records loaded: " + saveDataList.Count + " records");
+                
+                // 딕셔너리에 기록 추가
+                recordsDictionary.Clear();
+                foreach (var record in saveDataList)
+                {
+                    string recordKey = $"{record.date}_{record.time:F2}";
+                    recordsDictionary[recordKey] = record;
+                }
+                
+                Debug.Log($"Records loaded to dictionary: {recordsDictionary.Count} records");
             }
         }
         else
@@ -313,6 +341,20 @@ public class GameManager : Singleton<GameManager>
         // 시간 기준으로 내림차순 정렬하여 반환
         List<SaveData> sortedRecords = new List<SaveData>(saveDataList);
         sortedRecords.Sort((a, b) => b.time.CompareTo(a.time));
+        return sortedRecords;
+    }
+    
+    // 딕셔너리에서 기록 가져오기 (순위별)
+    public Dictionary<string, SaveData> GetRecordsDictionary()
+    {
+        return recordsDictionary;
+    }
+    
+    // 딕셔너리에서 순위별 기록 가져오기
+    public List<SaveData> GetRecordsFromDictionary()
+    {
+        List<SaveData> sortedRecords = new List<SaveData>(recordsDictionary.Values);
+        sortedRecords.Sort((a, b) => b.time.CompareTo(a.time)); // 시간 기준 내림차순 정렬
         return sortedRecords;
     }
     

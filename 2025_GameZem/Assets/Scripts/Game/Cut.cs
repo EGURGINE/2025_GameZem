@@ -17,7 +17,7 @@ public class Cut : MonoBehaviour
     
     private RectTransform rectTransform;
     private Image cutImage;
-    private bool hasReachedCutLine = false;
+    // private bool hasReachedCutLine = false; // 사용되지 않음 - 제거
     private bool hasPassedCutLine = false;
     private bool isWaitingForTouch = false;
     
@@ -81,7 +81,7 @@ public class Cut : MonoBehaviour
     public void ResetCutState()
     {
         // 컷 상태 초기화 (재사용을 위해)
-        hasReachedCutLine = false;
+        // hasReachedCutLine = false; // 제거됨
         hasPassedCutLine = false;
         isWaitingForTouch = true; // 스폰 즉시 터치 대기 시작
         

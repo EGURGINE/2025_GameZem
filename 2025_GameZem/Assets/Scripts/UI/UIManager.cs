@@ -332,7 +332,7 @@ public class UIManager : Singleton<UIManager>
         }
     }
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         // 이벤트 구독 해제
         if (GameManager.Instance != null)
@@ -343,5 +343,7 @@ public class UIManager : Singleton<UIManager>
             GameManager.Instance.OnGameCleared -= ShowGameClearedScreen;
             GameManager.Instance.OnComboAdded -= AddCombo;
         }
+        
+        base.OnDestroy();
     }
 }
