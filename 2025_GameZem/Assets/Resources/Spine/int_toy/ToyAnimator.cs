@@ -1,14 +1,8 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Spine;
 using Spine.Unity;
 
-/// <summary>
-/// - 시작 시 idle 재생
-/// - idleTime 초 뒤 자동으로 disappear 1회 재생
-/// - 그 전에 사용자가 이 오브젝트를 클릭/터치하면 즉시 disappear 전환
-/// - 지정한 여러 SpawnArea(RectTransform) 중 하나를 골라 그 내부 랜덤 위치에 배치
-///   (UI Canvas 기준. 월드 오브젝트일 경우 영역 배치는 생략됨)
-/// </summary>
 public class ToyAnimator : MonoBehaviour, IPointerDownHandler
 {
     [Header("Animation Settings")]
@@ -22,6 +16,13 @@ public class ToyAnimator : MonoBehaviour, IPointerDownHandler
     public string idleAnim = "idle";
     public string disappearAnim = "disappear";
 
+    [Header("After Disappear")]
+    [Tooltip("disappear 종료 후 이 오브젝트를 제거할지")]
+    public bool destroyAfterDisappear = true;
+
+    [Tooltip("disappear 후 다시는 리스폰하지 않게 스포너를 멈출지(선택)")]
+    public TimedUIRandomSpawner spawnerToStop;  // 인스펙터에 스포너를 드래그해서 연결하면 그 스포너의 리스폰을 막습니다.
+
     [Header("Random Position (UI)")]
     [Tooltip("랜덤 배치할 영역들(모두 RectTransform). 비어있으면 위치 변경 안 함")]
     public RectTransform[] spawnAreas;
@@ -29,21 +30,20 @@ public class ToyAnimator : MonoBehaviour, IPointerDownHandler
     private SkeletonGraphic sg;       // UI용
     private SkeletonAnimation sa;     // 월드용
     private bool _disappeared;        // 중복 실행 방지
+    private bool _removed;            // 제거 1회 보장
 
     void Awake()
     {
         sg = GetComponent<SkeletonGraphic>();
         sa = GetComponent<SkeletonAnimation>();
-
-        // UI라면 클릭 받게끔 보장
-        if (sg) sg.raycastTarget = true;
+        if (sg) sg.raycastTarget = true; // UI 클릭 보장
     }
 
     void OnEnable()
     {
         _disappeared = false;
+        _removed = false;
 
-        // UI인 경우 지정 영역 중 하나로 랜덤 배치
         if (sg && spawnAreas != null && spawnAreas.Length > 0)
             PlaceInRandomArea();
     }
@@ -53,18 +53,19 @@ public class ToyAnimator : MonoBehaviour, IPointerDownHandler
         if (playOnStart) PlaySequence();
     }
 
-    /// <summary>
-    /// idle → (idleTime 뒤) disappear
-    /// 클릭으로 조기 전환되면 queued 애니메이션은 자동 취소(Replace)됨.
-    /// </summary>
+    /// idle → (idleTime 뒤) disappear 예약 + 자동 제거 스케줄
     public void PlaySequence()
     {
+        float disappearLen = GetAnimDuration(disappearAnim);
+
         if (sg != null)
         {
             sg.Initialize(true);
             sg.AnimationState.SetAnimation(0, idleAnim, true);
-            // idleTime 뒤에 disappear 예약. 클릭 시 SetAnimation으로 대체됨.
             sg.AnimationState.AddAnimation(0, disappearAnim, false, idleTime);
+
+            // idleTime + disappear 길이 후 자동 제거
+            Invoke(nameof(RemoveSelfOnce), Mathf.Max(0.01f, idleTime + disappearLen));
             return;
         }
 
@@ -73,70 +74,77 @@ public class ToyAnimator : MonoBehaviour, IPointerDownHandler
             sa.Initialize(true);
             sa.state.SetAnimation(0, idleAnim, true);
             sa.state.AddAnimation(0, disappearAnim, false, idleTime);
+
+            Invoke(nameof(RemoveSelfOnce), Mathf.Max(0.01f, idleTime + disappearLen));
             return;
         }
 
         Debug.LogWarning("[ToyAnimator] SkeletonGraphic/Animation이 없습니다.", this);
     }
 
-    /// <summary>
-    /// 사용자가 클릭/터치했을 때 즉시 disappear로 전환 (UI)
-    /// </summary>
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        PlayDisappearNow();
-    }
+    /// 클릭/터치 시 즉시 disappear로 전환 + 끝나면 제거(리스폰 차단 포함)
+    public void OnPointerDown(PointerEventData eventData) => PlayDisappearNow();
 
-    /// <summary>
-    /// 외부에서 즉시 disappear로 바꾸고 싶을 때 호출 (버튼/이벤트)
-    /// </summary>
     public void PlayDisappearNow()
     {
         if (_disappeared) return;
         _disappeared = true;
 
+        float disappearLen = GetAnimDuration(disappearAnim);
+
         if (sg != null)
-        {
-            // 현재 트랙을 즉시 교체(큐 제거)
             sg.AnimationState.SetAnimation(0, disappearAnim, false);
-        }
         else if (sa != null)
-        {
             sa.state.SetAnimation(0, disappearAnim, false);
-        }
+
+        // 이미 예약되어 있던 자동 제거가 있더라도, 클릭 시점부터 길이만큼만 기다려 제거
+        CancelInvoke(nameof(RemoveSelfOnce));
+        Invoke(nameof(RemoveSelfOnce), Mathf.Max(0.01f, disappearLen));
     }
 
-    /// <summary>
-    /// 월드 오브젝트(스크린 스페이스 UI가 아닌 경우)에서 마우스 클릭으로도 동작하게.
-    /// (Collider 필요)
-    /// </summary>
-    void OnMouseDown()
+    void OnMouseDown()  // 월드 오브젝트용(콜라이더 필요)
     {
         if (sa != null) PlayDisappearNow();
     }
 
-    /// <summary>
-    /// spawnAreas 중 하나를 골라 그 안의 랜덤 위치에 배치 (UI 전용).
-    /// 서로 다른 Canvas라도 화면상의 절대 위치로 맞춰줌.
-    /// </summary>
+    // ===== Helpers =====
+    private void RemoveSelfOnce()
+    {
+        if (_removed) return;
+        _removed = true;
+
+        // 이후 리스폰 막기
+        if (spawnerToStop != null)
+        {
+            spawnerToStop.loop = false;        // 다시는 스폰하지 않도록
+            spawnerToStop.enabled = false;     // 안전하게 비활성화
+        }
+
+        if (destroyAfterDisappear) Destroy(gameObject);
+        else gameObject.SetActive(false);
+    }
+
+    private float GetAnimDuration(string animName)
+    {
+        SkeletonData data = null;
+        if (sg != null && sg.Skeleton != null) data = sg.Skeleton.Data;
+        else if (sa != null && sa.Skeleton != null) data = sa.Skeleton.Data;
+
+        var anim = data?.FindAnimation(animName);
+        return anim != null ? anim.Duration : 0.3f; // 못 찾으면 기본값
+    }
+
     private void PlaceInRandomArea()
     {
         var rt = transform as RectTransform;
         if (!rt) return;
-
         int idx = Random.Range(0, spawnAreas.Length);
-        RectTransform area = spawnAreas[idx];
+        var area = spawnAreas[idx];
         if (!area) return;
 
-        // 영역의 로컬 좌표계에서 임의 점
         Rect r = area.rect;
-        Vector3 local = new Vector3(
-            Random.Range(r.xMin, r.xMax),
-            Random.Range(r.yMin, r.yMax),
-            0f
-        );
-
-        // 영역 로컬 → 월드 → 내 RectTransform 위치로 반영
+        Vector3 local = new Vector3(Random.Range(r.xMin, r.xMax),
+                                    Random.Range(r.yMin, r.yMax), 0f);
         Vector3 world = area.TransformPoint(local);
         rt.position = world;
     }

@@ -1,48 +1,42 @@
 using UnityEngine;
 using Spine.Unity;
 
+[DisallowMultipleComponent]
 public class RandomToySwitcher : MonoBehaviour
 {
     [Header("Spine SkeletonData Assets")]
     public SkeletonDataAsset[] toyDataAssets;
 
-    [Header("Target SkeletonGraphic (하나만 존재)")]
+    [Header("Target SkeletonGraphic (하나만)")]
     public SkeletonGraphic skeletonGraphic;
 
-    [Header("애니메이션 이름")]
-    public string idleAnim = "idle";
-    public string disappearAnim = "disappear";
+    [Tooltip("시작할 때 1회만 랜덤 적용")]
+    public bool pickOnceOnStart = true;
+
+    bool _applied;   // 중복 실행 가드
 
     void Start()
     {
-        ShowRandomToy();
+        if (pickOnceOnStart) ApplyRandomOnce();
     }
 
-    public void ShowRandomToy()
+    public void ApplyRandomOnce()
     {
-        if (toyDataAssets == null || toyDataAssets.Length == 0 || !skeletonGraphic)
+        if (_applied) return;  // 이미 한 번 적용했음
+        _applied = true;
+
+        if (!skeletonGraphic || toyDataAssets == null || toyDataAssets.Length == 0)
         {
-            Debug.LogWarning("데이터 또는 SkeletonGraphic이 비어있음", this);
+            Debug.LogWarning("[RandomToySwitcher] 데이터/타겟 누락", this);
+            enabled = false;
             return;
         }
 
-        // 랜덤 SkeletonDataAsset 선택
-        int idx = Random.Range(0, toyDataAssets.Length);
-        var data = toyDataAssets[idx];
-
-        // SkeletonGraphic에 적용
+        var data = toyDataAssets[Random.Range(0, toyDataAssets.Length)];
         skeletonGraphic.skeletonDataAsset = data;
-        skeletonGraphic.Initialize(true); // 새 데이터 적용
+        skeletonGraphic.Initialize(true);   // ★ 데이터만 교체 (애니는 ToyAnimator가 처리)
 
-        // idle 애니메이션 실행
-        skeletonGraphic.AnimationState.SetAnimation(0, idleAnim, false);
-        // 일정 시간 뒤 disappear 실행 (필요 시)
-        StartCoroutine(PlayDisappearAfter(2f));
-    }
-
-    System.Collections.IEnumerator PlayDisappearAfter(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        skeletonGraphic.AnimationState.SetAnimation(0, disappearAnim, false);
+        // 더 이상 재실행되지 않도록 컴포넌트 꺼두기
+        enabled = false;
     }
 }
