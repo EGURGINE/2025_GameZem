@@ -78,11 +78,9 @@ public class GameManager : Singleton<GameManager>
         if (cutSpawner != null)
         {
             cutSpawner.ResetGameState();
-            Debug.Log("[GameManager] CutSpawner 게임 상태 초기화됨");
         }
         else
         {
-            Debug.LogWarning("[GameManager] CutSpawner를 찾을 수 없습니다!");
         }
         
         // 필요한 객체들이 null이면 자동으로 찾기
@@ -126,7 +124,6 @@ public class GameManager : Singleton<GameManager>
             currentDate = newDate;
             SafeInvokeEvent(() => OnDateChanged?.Invoke(currentDate), "OnDateChanged");
             UpdateProgress();
-            Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM"));
         }
     }
     
@@ -140,6 +137,16 @@ public class GameManager : Singleton<GameManager>
         // 0~1 범위로 제한
         progress = Mathf.Clamp01(progress);
         
+        
+        // 직접 호출도 시도해보기
+        if (OnProgressChanged != null)
+        {
+            OnProgressChanged.Invoke(progress);
+        }
+        else
+        {
+        }
+        
         SafeInvokeEvent(() => OnProgressChanged?.Invoke(progress), "OnProgressChanged");
     }
     
@@ -150,7 +157,6 @@ public class GameManager : Singleton<GameManager>
         
         // 성공 시 점수는 증가하지 않음 (생존만 중요)
         SafeInvokeEvent(() => OnComboAdded?.Invoke(), "OnComboAdded");
-        Debug.Log("Cut Success!");
         
         // 성공 효과음 재생
         // if (SoundManager.Instance != null)
@@ -161,17 +167,13 @@ public class GameManager : Singleton<GameManager>
     
     public void OnCutMissCallback()
     {
-        Debug.Log("[GameManager] OnCutMissCallback 호출됨 - isGameActive: " + isGameActive + ", currentLives: " + currentLives);
         
         if (!isGameActive) 
         {
-            Debug.Log("[GameManager] 게임이 비활성화 상태라서 피 감소 안함");
             return;
         }
         
-        Debug.Log("[GameManager] 피 감소 전 - 현재 생명: " + currentLives);
         LoseLife();
-        Debug.Log("[GameManager] Cut Miss! Lives: " + currentLives);
         
         // 실패 효과음 재생
         // if (SoundManager.Instance != null)
@@ -183,16 +185,13 @@ public class GameManager : Singleton<GameManager>
     
     public void LoseLife()
     {
-        Debug.Log($"[GameManager] LoseLife 시작 - currentLives: {currentLives}");
         currentLives--;
-        Debug.Log($"[GameManager] currentLives 감소 후: {currentLives}");
         
         // 이벤트 호출
         SafeInvokeEvent(() => OnLivesChanged?.Invoke(currentLives), "OnLivesChanged");
         
         if (currentLives <= 0)
         {
-            Debug.Log("[GameManager] 생명이 0 이하 - GameOver 호출");
             GameOver();
         }
     }
@@ -253,7 +252,6 @@ public class GameManager : Singleton<GameManager>
 
         TestScore.Instance?.ManualSyncRecords();
         
-        Debug.Log("Game Cleared! Reached: " + endDate.ToString("yyyy. MM. dd"));
         
         // 게임 클리어 효과음 재생
         // if (SoundManager.Instance != null)
@@ -313,15 +311,19 @@ public class GameManager : Singleton<GameManager>
                         }
                         catch (System.Exception e)
                         {
-                            Debug.LogWarning($"[GameManager] {eventName} 이벤트 구독자 호출 실패: {e.Message}");
                         }
                     }
+                }
+                else
+                {
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[GameManager] {eventName} 이벤트 호출 실패: {e.Message}");
             }
+        }
+        else
+        {
         }
     }
     
@@ -382,7 +384,6 @@ public class GameManager : Singleton<GameManager>
         PlayerPrefs.SetString(SAVE_KEY, json);
         PlayerPrefs.Save();
         
-        Debug.Log($"Records saved to dictionary: {recordsDictionary.Count} records (top {MAX_RECORDS})");
     }
     
     // 기록 불러오기 (딕셔너리 기반)
@@ -404,12 +405,10 @@ public class GameManager : Singleton<GameManager>
                     recordsDictionary[recordKey] = record;
                 }
                 
-                Debug.Log($"Records loaded to dictionary: {recordsDictionary.Count} records");
             }
         }
         else
         {
-            Debug.Log("No saved records found");
         }
     }
     
@@ -442,7 +441,6 @@ public class GameManager : Singleton<GameManager>
         saveDataList.Clear();
         PlayerPrefs.DeleteKey(SAVE_KEY);
         PlayerPrefs.Save();
-        Debug.Log("All records cleared");
     }
     
     // 최고 기록 가져오기 (가장 오래 버틴 기록)

@@ -18,7 +18,7 @@ public class CutSpawner : MonoBehaviour
     public float screenWidthPadding = 50f; // 화면 양쪽 여백
     
     [Header("Cut Speed Settings")]
-    public float baseCutSpeed = 10f; // 기본 컷 속도
+    public float baseCutSpeed = 20f; // 기본 컷 속도
     public float normalSpeedCap = 2.5f; // 일반 상황 속도 상한선 (배수)
     public float editorPressureSpeedCap = 4.0f; // 편집자 독촉 시 속도 상한선 (배수)
     
@@ -78,11 +78,9 @@ public class CutSpawner : MonoBehaviour
         // GameManager가 있으면 상태 동기화
         if (GameManager.Instance != null)
         {
-            Debug.Log("[CutSpawner] GameManager와 상태 동기화 중...");
             // GameManager의 상태를 CutSpawner에 반영
             isGameActive = GameManager.Instance.IsGameActive();
             isGameCleared = GameManager.Instance.IsGameCleared();
-            Debug.Log($"[CutSpawner] 동기화 완료 - isGameActive: {isGameActive}, isGameCleared: {isGameCleared}");
         }
         
         // Time.timeScale도 확실히 1로 설정
@@ -103,16 +101,13 @@ public class CutSpawner : MonoBehaviour
             cutLine = GetCutLine();
             if (cutLine != null)
             {
-                Debug.Log($"[CutSpawner] CutLine을 자동으로 초기화했습니다: {cutLine.name}");
             }
             else
             {
-                Debug.LogWarning("[CutSpawner] CutLine을 찾을 수 없습니다. Inspector에서 수동으로 설정해주세요.");
             }
         }
         else
         {
-            Debug.Log($"[CutSpawner] CutLine이 이미 설정되어 있습니다: {cutLine.name}");
         }
         
         StartSequence();
@@ -141,6 +136,22 @@ public class CutSpawner : MonoBehaviour
             }
             
             nextSpawnIndex++;
+
+            if(nextSpawnIndex % 5 == 0)
+            {
+                if(GameManager.Instance == null)
+                {
+                    var gm = GameObject.FindObjectOfType<GameManager>();
+                    if(gm != null)
+                    {
+                        gm.AddMonth();
+                    }
+                }
+                else
+                {
+                    GameManager.Instance.AddMonth();
+                }
+            }
         }
         
         // 터치 입력 처리 (중앙 관리)
@@ -149,12 +160,14 @@ public class CutSpawner : MonoBehaviour
         // 시퀀스 완료 체크 (모든 이벤트 소환 완료)
         if (nextSpawnIndex >= spawnTimeline.Count && spawnTimeline.Count > 0)
         {
-            Debug.Log($"Sequence {currentSequenceIndex + 1} completed! All {spawnTimeline.Count} events spawned.");
             
             // GameManager에 한 달 증가 알림
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.AddMonth();
+                //GameManager.Instance.AddMonth();
+            }
+            else
+            {
             }
             
             currentMonth++;
@@ -166,7 +179,6 @@ public class CutSpawner : MonoBehaviour
             else
             {
                 // 모든 시퀀스 완료 (엔딩)
-                Debug.Log("All sequences completed! Game Ending!");
                 OnGameEnding();
             }
         }
@@ -180,19 +192,16 @@ public class CutSpawner : MonoBehaviour
             // UI 요소를 터치했는지 확인
             if (IsUITouched())
             {
-                Debug.Log("[CutSpawner] UI 터치 감지 - Cut 터치 처리 건너뜀");
                 return;
             }
             // CutLine과 가장 가까운 Cut 찾기
             Cut closestCut = null;
             float closestDistance = float.MaxValue;
-            Debug.Log($"[CutSpawner] activeCuts.Count: {activeCuts.Count}");
             
             foreach (GameObject cutObj in activeCuts)
             {
                 if (cutObj == null || !cutObj.activeInHierarchy) 
                 {
-                    Debug.Log($"[CutSpawner] Cut 제외 - null: {cutObj == null}, activeInHierarchy: {cutObj?.activeInHierarchy}");
                     continue;
                 }
                 
@@ -204,37 +213,30 @@ public class CutSpawner : MonoBehaviour
                     {
                         // CutLine과의 거리 계산
                         float distance = cutScript.GetDistanceToCutLine();
-                        Debug.Log($"[CutSpawner] Cut 거리: {distance:F1}");
                         
                         if (distance < closestDistance)
                         {
                             closestDistance = distance;
                             closestCut = cutScript;
-                            Debug.Log($"[CutSpawner] 가장 가까운 Cut 업데이트 - 거리: {distance:F1}");
                         }
                     }
                     else
                     {
-                        Debug.Log($"[CutSpawner] Cut 제외 - 터치 대기 상태 아님 또는 이미 처리됨");
                     }
                 }
                 else
                 {
-                    Debug.Log("[CutSpawner] Cut 컴포넌트 없음");
                 }
             }
 
-            Debug.Log($"closestCut: {(closestCut != null ? "찾음" : "없음")}, 거리: {closestDistance:F1}");
             
             // 가장 가까운 Cut이 없으면 리턴
             if (closestCut == null) 
             {
-                Debug.Log("[CutSpawner] 터치 가능한 Cut이 없음");
                 return;
             }
             
             // 가장 가까운 Cut만 터치 처리
-            Debug.Log($"[CutSpawner] 가장 가까운 Cut 터치 처리: {closestCut.name}");
             closestCut.TryProcessClick();
         }
     }
@@ -276,7 +278,6 @@ public class CutSpawner : MonoBehaviour
             sequenceData.Add(new SequenceData(29, SpawnType.CutLineTape, null)); // 순서 29: CutLineTape
             sequenceData.Add(new SequenceData(30, SpawnType.Cut, SpawnType.EditorPressure)); // 순서 30: Cut + EditorPressure
             
-            Debug.Log($"Sequence data initialized: {sequenceData.Count} steps (1-30)");
         }
     }
     
@@ -284,7 +285,6 @@ public class CutSpawner : MonoBehaviour
     {
         if (currentMonth > targetMonth)
         {
-            Debug.Log("All sequences completed!");
             return;
         }
         
@@ -299,7 +299,6 @@ public class CutSpawner : MonoBehaviour
         GenerateSequenceTimeline();
         
         float totalDuration = spawnTimeline.Count > 0 ? spawnTimeline[spawnTimeline.Count - 1].spawnTime : 0f;
-        Debug.Log($"Starting sequence for month {currentMonth}: {spawnTimeline.Count} total spawns over ~{totalDuration:F2} seconds");
     }
     
     private void GenerateSequenceTimeline()
@@ -308,7 +307,7 @@ public class CutSpawner : MonoBehaviour
         
         float currentTime = 0f;
         float minInterval = 1f; // 최소 간격
-        float maxInterval = 2f; // 최대 간격
+        float maxInterval = 1.5f; // 최대 간격
         
         // 30개 순서를 1~2초 간격으로 배치
         for (int i = 0; i < sequenceData.Count; i++)
@@ -353,13 +352,11 @@ public class CutSpawner : MonoBehaviour
         spawnTimeline.Sort((a, b) => a.spawnTime.CompareTo(b.spawnTime));
         
         float totalDuration = spawnTimeline.Count > 0 ? spawnTimeline[spawnTimeline.Count - 1].spawnTime : 0f;
-        Debug.Log($"Generated sequence timeline with {spawnTimeline.Count} events over {totalDuration:F2}s");
         
         // 디버그: 타임라인 출력
         foreach (var evt in spawnTimeline)
         {
             string type = evt.isCut ? "Cut" : evt.obstacleType.ToString();
-            Debug.Log($"  {evt.spawnTime:F2}s: {type}");
         }
     }
     
@@ -399,14 +396,12 @@ public class CutSpawner : MonoBehaviour
             }
         }
         
-        Debug.Log($"Object pool initialized with {poolSize} cuts");
     }
     
     private void SpawnCut()
     {
         if (cutPool.Count == 0)
         {
-            Debug.LogWarning("Cut pool is empty! Cannot spawn cut.");
             return;
         }
         
@@ -445,14 +440,12 @@ public class CutSpawner : MonoBehaviour
         // 테이프 플래그 리셋
         nextCutHasTape = false;
         
-        Debug.Log($"Cut spawned at time {stageTimer:F2}. Total: {cutsSpawnedInSequence}. Pool size: {cutPool.Count}");
     }
     
     private void SpawnObstacleByType(ObstacleType type, bool randomPosition = false)
     {
         if (obstacleManager == null)
         {
-            Debug.LogWarning("ObstacleManager reference is missing!");
             return;
         }
         
@@ -475,7 +468,6 @@ public class CutSpawner : MonoBehaviour
         obstacleManager.SpawnObstacleFromExternal(type, spawnPosition);
         
         obstaclesSpawnedInSequence++;
-        Debug.Log($"Obstacle spawned: {type} at time {stageTimer:F2}, Position: {spawnPosition}, Random: {randomPosition}");
     }
     
     
@@ -483,7 +475,6 @@ public class CutSpawner : MonoBehaviour
     public void SetNextCutHasTape()
     {
         nextCutHasTape = true;
-        Debug.Log("Next cut will have tape (double-click required)");
     }
     
     // 편집자 원고 독촉 이벤트 토글
@@ -493,11 +484,9 @@ public class CutSpawner : MonoBehaviour
         
         if (isEditorPressureActive)
         {
-            Debug.Log($"[Editor Pressure] STARTED! Speed cap increased to {editorPressureSpeedCap}x");
         }
         else
         {
-            Debug.Log($"[Editor Pressure] ENDED! Speed cap returned to {normalSpeedCap}x");
             // 현재 속도가 일반 상한선을 초과하면 서서히 감소하도록 조정
             if (currentSpeedMultiplier > normalSpeedCap)
             {
@@ -541,7 +530,6 @@ public class CutSpawner : MonoBehaviour
         
         // 풀로 반환
             ReturnCutToPool(destroyedCut);
-        Debug.Log($"Cut destroyed and returned to pool. Active cuts: {activeCuts.Count}");
     }
     
     private void ReturnCutToPool(GameObject cut)
@@ -554,7 +542,6 @@ public class CutSpawner : MonoBehaviour
             // 풀에 다시 추가
             cutPool.Enqueue(cut);
             
-            Debug.Log($"Cut returned to pool. Pool size: {cutPool.Count}");
         }
     }
     
@@ -570,12 +557,10 @@ public class CutSpawner : MonoBehaviour
     
     private void OnCutSuccess()
     {
-        Debug.Log("Cut success!");
         
         // 게임이 비활성화 상태면 처리하지 않음
         if (!isGameActive || isGameCleared)
         {
-            Debug.Log("[CutSpawner] 게임이 비활성화 상태라서 OnCutSuccess 처리 건너뜀");
             return;
         }
         
@@ -587,7 +572,6 @@ public class CutSpawner : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[CutSpawner] GameManager.Instance 접근 중 오류: {e.Message}. 직접 찾기를 시도합니다.");
             gameManager = FindFirstObjectByType<GameManager>();
         }
         
@@ -605,7 +589,6 @@ public class CutSpawner : MonoBehaviour
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[CutSpawner] GameManager.OnCutSuccessCallback() 호출 실패: {e.Message}");
             }
         }
         
@@ -614,12 +597,10 @@ public class CutSpawner : MonoBehaviour
     
     private void OnCutMiss()
     {
-        Debug.Log("[CutSpawner] OnCutMiss 호출됨");
         
         // 게임이 비활성화 상태면 처리하지 않음
         if (!isGameActive || isGameCleared)
         {
-            Debug.Log("[CutSpawner] 게임이 비활성화 상태라서 OnCutMiss 처리 건너뜀");
             return;
         }
         
@@ -631,7 +612,6 @@ public class CutSpawner : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[CutSpawner] GameManager.Instance 접근 중 오류: {e.Message}. 직접 찾기를 시도합니다.");
             gameManager = FindFirstObjectByType<GameManager>();
         }
         
@@ -639,7 +619,6 @@ public class CutSpawner : MonoBehaviour
         {
             // GameManager.Instance가 null이면 직접 찾기
             gameManager = FindFirstObjectByType<GameManager>();
-            Debug.Log($"[CutSpawner] GameManager.Instance가 null이어서 직접 찾기: {(gameManager != null ? "찾음" : "없음")}");
         }
         
         if (gameManager != null)
@@ -647,20 +626,16 @@ public class CutSpawner : MonoBehaviour
 
 
             
-            Debug.Log("[CutSpawner] GameManager 존재함 - OnCutMissCallback() 호출");
             try
             {
                 gameManager.OnCutMissCallback();
-                Debug.Log("[CutSpawner] GameManager.OnCutMissCallback() 호출 완료");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[CutSpawner] GameManager.OnCutMissCallback() 호출 실패: {e.Message}");
             }
         }
         else
         {
-            Debug.LogWarning("[CutSpawner] GameManager를 찾을 수 없습니다!");
         }
         
         // SpawnCutsCoroutine에서 자동으로 다음 컷을 스폰하므로 여기서는 알림만
@@ -701,7 +676,6 @@ public class CutSpawner : MonoBehaviour
         // 첫 번째 시퀀스 시작
         StartSequence();
         
-        Debug.Log("CutSpawner reset to first sequence");
     }
     
     public void ClearAllCuts()
@@ -727,7 +701,6 @@ public class CutSpawner : MonoBehaviour
         }
         else
         {
-            Debug.Log("All sequences completed!");
         }
     }
     
@@ -772,7 +745,6 @@ public class CutSpawner : MonoBehaviour
             // 여기서는 추가 처리가 필요 없음
         }
         
-        Debug.Log("Game Ending: All cuts and obstacles cleared");
     }
     
     /// <summary>
@@ -785,7 +757,6 @@ public class CutSpawner : MonoBehaviour
     public void SetGameActive(bool active)
     {
         isGameActive = active;
-        Debug.Log($"[CutSpawner] 게임 상태 변경: {(active ? "활성화" : "비활성화")}");
     }
     
     /// <summary>
@@ -797,7 +768,6 @@ public class CutSpawner : MonoBehaviour
         if (cleared)
         {
             isGameActive = false;
-            Debug.Log("[CutSpawner] 게임 클리어됨");
         }
     }
     
@@ -816,7 +786,6 @@ public class CutSpawner : MonoBehaviour
         stageTimer = 0f;
         nextSpawnIndex = 0;
         
-        Debug.Log("[CutSpawner] 게임 상태 초기화됨");
     }
     
     /// <summary>
@@ -828,7 +797,6 @@ public class CutSpawner : MonoBehaviour
         {
             isGameActive = GameManager.Instance.IsGameActive();
             isGameCleared = GameManager.Instance.IsGameCleared();
-            Debug.Log($"[CutSpawner] GameManager와 상태 동기화 - isGameActive: {isGameActive}, isGameCleared: {isGameCleared}");
         }
     }
     
@@ -849,7 +817,6 @@ public class CutSpawner : MonoBehaviour
         // 모든 컷 정리
         ClearAllCuts();
         
-        Debug.Log("[CutSpawner] OnDestroy - 게임 상태 정리 완료");
     }
     
     /// <summary>
@@ -890,7 +857,6 @@ public class CutSpawner : MonoBehaviour
             if (foundCutLine != null)
             {
                 cutLine = foundCutLine;
-                Debug.Log($"[CutSpawner] CutLine을 자동으로 찾아서 설정했습니다: {cutLine.name}");
             }
             
             return foundCutLine;
@@ -940,7 +906,6 @@ public class CutSpawner : MonoBehaviour
                         // UI 버튼 태그 확인
                         if (buttonTag == "ui_button" || buttonTag == "game_button")
                         {
-                            Debug.Log($"[CutSpawner] UI 버튼 터치 감지: {result.gameObject.name} (태그: {buttonTag})");
                             return true;
                         }
                     }

@@ -1,0 +1,11 @@
+int_scribble.png
+size:1645,1570
+filter:Linear,Linear
+pma:true
+arm
+bounds:865,207,411,327
+body
+bounds:2,2,861,532
+scribble
+bounds:2,536,1032,1641
+rotate:90

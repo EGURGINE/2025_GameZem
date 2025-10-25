@@ -7,6 +7,7 @@ public class UIManager : Singleton<UIManager>
 {
     [Header("Game UI")]
     public TextMeshProUGUI dateText; // 날짜 표시 (스코어 대신)
+    public TextMeshProUGUI bestDateText;
     public GameObject[] lifeIcons; // 하트 아이콘 배열 (3개)
     public SkeletonGraphic[] heartSkeletons; // 하트 Spine SkeletonGraphic 배열 (3개)
     public TextMeshProUGUI comboText;
@@ -47,7 +48,6 @@ public class UIManager : Singleton<UIManager>
     
     private void Start()
     {
-        Debug.Log("[UIManager] Start"); 
         InitializeUI();
         SubscribeToEvents();
     }
@@ -62,7 +62,6 @@ public class UIManager : Singleton<UIManager>
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[UIManager] GameManager.Instance 접근 중 오류: {e.Message}");
             gameManager = FindFirstObjectByType<GameManager>();
         }
         
@@ -75,6 +74,14 @@ public class UIManager : Singleton<UIManager>
         UpdateLivesDisplay(gameManager.GetCurrentLives());
         UpdateDateDisplay(gameManager.GetCurrentDate());
         UpdateComboDisplay(0);
+        
+        // progressSlider 상태 확인
+        if (progressSlider != null)
+        {
+        }
+        else
+        {
+        }
         
         // 버튼 이벤트 연결
         if (restartButton != null)
@@ -112,7 +119,6 @@ public class UIManager : Singleton<UIManager>
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[UIManager] GameManager.Instance 접근 중 오류: {e.Message}. 직접 찾기를 시도합니다.");
             gameManager = FindFirstObjectByType<GameManager>();
         }
         
@@ -120,23 +126,19 @@ public class UIManager : Singleton<UIManager>
         {
             // GameManager.Instance가 null이면 직접 찾기
             gameManager = FindFirstObjectByType<GameManager>();
-            Debug.Log($"[UIManager] GameManager.Instance가 null이어서 직접 찾기: {(gameManager != null ? "찾음" : "없음")}");
         }
         
         if (gameManager != null)
         {
-            Debug.Log("[UIManager] GameManager 이벤트 구독 시작");
             gameManager.OnDateChanged += UpdateDateDisplay;
             gameManager.OnLivesChanged += UpdateLivesDisplay;
             gameManager.OnGameOver += ShowGameOverScreen;
             gameManager.OnGameCleared += ShowGameClearedScreen;
             gameManager.OnComboAdded += AddCombo;
             gameManager.OnProgressChanged += UpdateProgressDisplay;
-            Debug.Log("[UIManager] GameManager 이벤트 구독 완료");
         }
         else
         {
-            Debug.LogWarning("[UIManager] GameManager를 찾을 수 없어서 이벤트 구독 실패!");
         }
     }
     
@@ -147,7 +149,6 @@ public class UIManager : Singleton<UIManager>
     
     private void UpdateLivesDisplay(int lives)
     {
-        Debug.Log($"[UIManager] UpdateLivesDisplay 호출됨 - lives: {lives}, previousLives: {previousLives}");
         
         // 하트 아이콘으로 생명 표시
         if (lifeIcons != null && lifeIcons.Length > 0 && heartSkeletons != null)
@@ -182,7 +183,6 @@ public class UIManager : Singleton<UIManager>
                                 // 애니메이션 완료 후 오브젝트 비활성화
                                 StartCoroutine(DisableAfterAnimation(heartSkeletons[i], lifeIcons[i]));
                                 
-                                                                 Debug.Log($"[UIManager] 하트 {i}에 appear 애니메이션 재생 - Duration: {trackEntry.Animation.Duration}");
                                 continue; // 이 하트는 비활성화하지 않음 (애니메이션 후 처리)
                             }
                         }
@@ -195,7 +195,6 @@ public class UIManager : Singleton<UIManager>
                         if (i < heartSkeletons.Length && heartSkeletons[i] != null)
                         {
                             heartSkeletons[i].AnimationState.SetAnimation(0, "appear", false);
-                            Debug.Log($"[UIManager] 하트 {i}에 appear 애니메이션 재생");
                         }
                     }
                     
@@ -207,13 +206,11 @@ public class UIManager : Singleton<UIManager>
                     }
                     
                     lifeIcons[i].SetActive(shouldBeActive);
-                    Debug.Log($"[UIManager] LifeIcon {i}: {(shouldBeActive ? "활성화" : "비활성화")}");
                 }
             }
         }
         else
         {
-            Debug.LogWarning("[UIManager] lifeIcons 또는 heartSkeletons가 null이거나 비어있습니다!");
         }
         
         // 이전 생명 수 업데이트
@@ -236,7 +233,6 @@ public class UIManager : Singleton<UIManager>
         if (lifeIcon != null)
         {
             lifeIcon.SetActive(false);
-            Debug.Log($"[UIManager] 하트 애니메이션 완료 후 비활성화");
         }
     }
     
@@ -244,7 +240,21 @@ public class UIManager : Singleton<UIManager>
     {
         if (dateText != null)
         {
+
             dateText.text = date.ToString("yyyy. MM");
+
+            if(GameManager.Instance == null)
+            {
+                var gameManager = GameObject.FindObjectOfType<GameManager>();
+                if(gameManager != null)
+                {
+                    bestDateText.text = "최고 기록 "+ gameManager.GetBestRecord().date.Substring(0, 8);
+                }
+            }
+            else
+            {
+                bestDateText.text = "최고 기록 "+ GameManager.Instance.GetBestRecord().date.Substring(0, 8);
+            }
         }
     }
     
@@ -253,6 +263,9 @@ public class UIManager : Singleton<UIManager>
         if (progressSlider != null)
         {
             progressSlider.value = progress;
+        }
+        else
+        {
         }
     }
     
@@ -382,7 +395,22 @@ public class UIManager : Singleton<UIManager>
             if (bestScoreText != null)
             {
                 var bestScore = GameManager.Instance.GetBestRecord();
-                bestScoreText.text = $"최고 기록 {bestScore.date}";
+                if (bestScore != null && !string.IsNullOrEmpty(bestScore.date))
+                {
+                    // 날짜 문자열을 DateTime으로 파싱하여 연도와 월만 표시
+                    if (System.DateTime.TryParse(bestScore.date, out System.DateTime dateTime))
+                    {
+                        bestScoreText.text = $"{dateTime:yyyy. MM}";
+                    }
+                    else
+                    {
+                        bestScoreText.text = bestScore.date;
+                    }
+                }
+                else
+                {
+                    bestScoreText.text = "기록 없음";
+                }
             }
         }
     }
@@ -396,14 +424,29 @@ public class UIManager : Singleton<UIManager>
             // 클리어 메시지
             if (finalScoreText != null)
             {
-                finalScoreText.text = "Game Cleared!\n2020. 07. 27";
+                finalScoreText.text = "Game Cleared!\n2020. 07";
             }
             
             // 총 소요 일수
             if (bestScoreText != null)
             {
                 var bestScore = GameManager.Instance.GetBestRecord();
-                bestScoreText.text = $"최고 기록 {bestScore.date}";
+                if (bestScore != null && !string.IsNullOrEmpty(bestScore.date))
+                {
+                    // 날짜 문자열을 DateTime으로 파싱하여 연도와 월만 표시
+                    if (System.DateTime.TryParse(bestScore.date, out System.DateTime dateTime))
+                    {
+                        bestScoreText.text = $"{dateTime:yyyy. MM}";
+                    }
+                    else
+                    {
+                        bestScoreText.text = $"{bestScore.date}";
+                    }
+                }
+                else
+                {
+                    bestScoreText.text = "최고 기록 없음";
+                }
             }
         }
     }
@@ -504,16 +547,13 @@ public class UIManager : Singleton<UIManager>
                 gameManager.OnGameCleared -= ShowGameClearedScreen;
                 gameManager.OnComboAdded -= AddCombo;
                 gameManager.OnProgressChanged -= UpdateProgressDisplay;
-                Debug.Log("[UIManager] 이벤트 구독 해제 완료");
             }
             else
             {
-                Debug.Log("[UIManager] GameManager를 찾을 수 없어서 이벤트 구독 해제 건너뜀");
             }
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning($"[UIManager] 이벤트 구독 해제 중 오류 발생: {e.Message}");
         }
         
         base.OnDestroy();
