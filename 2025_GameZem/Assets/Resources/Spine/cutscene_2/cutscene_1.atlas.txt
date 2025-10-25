@@ -1,0 +1,17 @@
+cutscene_1.png
+size:1918,882
+filter:Linear,Linear
+pma:true
+1
+bounds:1201,573,555,307
+background
+bounds:606,13,867,593
+rotate:90
+body
+bounds:1644,191,380,272
+rotate:90
+frame
+bounds:2,2,878,602
+rotate:90
+head
+bounds:1201,60,441,511

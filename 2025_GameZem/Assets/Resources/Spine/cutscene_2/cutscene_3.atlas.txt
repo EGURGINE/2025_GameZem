@@ -1,0 +1,14 @@
+cutscene_3.png
+size:1071,606
+filter:Linear,Linear
+pma:true
+bg
+bounds:426,10,413,594
+body
+bounds:841,52,206,129
+offsets:13,14,233,158
+frame
+bounds:2,2,422,602
+head
+bounds:841,183,421,228
+rotate:90

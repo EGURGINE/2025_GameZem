@@ -1,0 +1,16 @@
+cutscene_4.png
+size:1715,813
+filter:Linear,Linear
+pma:true
+1
+bounds:1371,41,342,770
+2
+bounds:2,42,281,213
+offsets:15,21,310,247
+bg
+bounds:841,2,528,809
+frame
+bounds:2,257,554,837
+rotate:90
+twinkle
+bounds:285,141,80,114

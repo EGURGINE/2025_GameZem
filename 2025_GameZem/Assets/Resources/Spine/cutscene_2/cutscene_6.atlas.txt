@@ -1,0 +1,14 @@
+cutscene_6.png
+size:1545,1206
+filter:Linear,Linear
+pma:true
+1
+bounds:705,19,418,581
+2
+bounds:1125,23,418,581
+bg1
+bounds:2,2,701,598
+bg2
+bounds:714,606,700,598
+frame
+bounds:2,602,710,602
