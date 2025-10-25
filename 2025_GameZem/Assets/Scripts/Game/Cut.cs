@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
-
+using Spine.Unity;
 public class Cut : MonoBehaviour
 {
     [Header("Cut Settings")]
@@ -29,13 +29,192 @@ public class Cut : MonoBehaviour
     private Transform cutLineTransform;
     private CutSpawner spawnerReference; // 스폰어 참조
 
-
+    [Header("Cut Line Tape")]
+    [SerializeField] private GameObject cutLineTapePrefab;
+    private bool isTape = false;
     
+    // Double Click Detection
+    private float lastClickTime = 0f;
+    private float doubleClickThreshold = 0.3f; // 더블클릭으로 인정하는 시간 간격 (초)
+
+    [Header("Spine")]
+    private Spine.Unity.SkeletonAnimation skeletonAnimation;
+    private Spine.Unity.SkeletonGraphic skeletonGraphic; // UI용 SkeletonGraphic
+    [SerializeField] private string idleAnimationName = "default"; // 정지 애니메이션 이름
+    [SerializeField] private string successAnimationName = "idle"; // 성공 시 재생할 애니메이션 이름
+    [SerializeField] private bool loopSuccessAnimation = true; // 성공 애니메이션 루프 여부
     
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         cutImage = GetComponent<Image>();
+        
+        // Spine 애니메이션 컴포넌트 찾기 (SkeletonAnimation 또는 SkeletonGraphic)
+        skeletonAnimation = GetComponentInChildren<Spine.Unity.SkeletonAnimation>();
+        skeletonGraphic = GetComponentInChildren<Spine.Unity.SkeletonGraphic>();
+        
+        if (skeletonAnimation != null)
+        {
+            Debug.Log($"[Cut] SkeletonAnimation 찾음: {skeletonAnimation.gameObject.name}");
+            Debug.Log($"[Cut] 사용 가능한 애니메이션 목록:");
+            var data = skeletonAnimation.Skeleton.Data;
+            foreach (var anim in data.Animations)
+            {
+                Debug.Log($"  - {anim.Name}");
+            }
+            SetIdleAnimation();
+        }
+        else if (skeletonGraphic != null)
+        {
+            Debug.Log($"[Cut] SkeletonGraphic 찾음: {skeletonGraphic.gameObject.name}");
+            Debug.Log($"[Cut] 사용 가능한 애니메이션 목록:");
+            var data = skeletonGraphic.Skeleton.Data;
+            foreach (var anim in data.Animations)
+            {
+                Debug.Log($"  - {anim.Name}");
+            }
+            SetIdleAnimation();
+        }
+        else
+        {
+            Debug.LogWarning($"[Cut] Spine 애니메이션/그래픽을 찾을 수 없음!");
+        }
+    }
+    
+    private void SetIdleAnimation()
+    {
+        if (skeletonAnimation == null && skeletonGraphic == null)
+        {
+            Debug.LogWarning("[Cut] SetIdleAnimation: Spine 컴포넌트가 null입니다!");
+            return;
+        }
+        
+        Debug.Log($"[Cut] SetIdleAnimation 호출 - 애니메이션: '{idleAnimationName}'");
+        
+        // idle 애니메이션이 있으면 설정 (첫 프레임)
+        if (!string.IsNullOrEmpty(idleAnimationName))
+        {
+            try
+            {
+                if (skeletonAnimation != null)
+                {
+                    // SkeletonAnimation 사용
+                    skeletonAnimation.timeScale = 0f;
+                    
+                    // 애니메이션 존재 여부 확인
+                    string animToPlay = idleAnimationName;
+                    if (skeletonAnimation.Skeleton.Data.FindAnimation(idleAnimationName) == null)
+                    {
+                        Debug.LogWarning($"[Cut] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 'idle'로 대체합니다.");
+                        animToPlay = "idle";
+                    }
+                    
+                    var trackEntry = skeletonAnimation.AnimationState.SetAnimation(0, animToPlay, false);
+                    Debug.Log($"[Cut] SkeletonAnimation Idle 설정 완료 - 애니메이션: '{animToPlay}', trackEntry: {trackEntry != null}");
+                }
+                else if (skeletonGraphic != null)
+                {
+                    // SkeletonGraphic 사용
+                    skeletonGraphic.timeScale = 0f;
+                    
+                    // 애니메이션 존재 여부 확인
+                    string animToPlay = idleAnimationName;
+                    if (skeletonGraphic.Skeleton.Data.FindAnimation(idleAnimationName) == null)
+                    {
+                        Debug.LogWarning($"[Cut] '{idleAnimationName}' 애니메이션을 찾을 수 없습니다. 'idle'로 대체합니다.");
+                        animToPlay = "idle";
+                    }
+                    
+                    var trackEntry = skeletonGraphic.AnimationState.SetAnimation(0, animToPlay, false);
+                    Debug.Log($"[Cut] SkeletonGraphic Idle 설정 완료 - 애니메이션: '{animToPlay}', trackEntry: {trackEntry != null}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Cut] Idle 애니메이션 설정 실패: {e.Message}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[Cut] idleAnimationName이 비어있습니다!");
+        }
+    }
+    
+    private void PlaySuccessAnimation()
+    {
+        if (skeletonAnimation == null && skeletonGraphic == null)
+        {
+            Debug.LogWarning("[Cut] PlaySuccessAnimation: Spine 컴포넌트가 null입니다!");
+            return;
+        }
+        
+        Debug.Log($"[Cut] PlaySuccessAnimation 호출 - 애니메이션: '{successAnimationName}', 루프: {loopSuccessAnimation}");
+        
+        // 성공 애니메이션 재생
+        if (!string.IsNullOrEmpty(successAnimationName))
+        {
+            try
+            {
+                if (skeletonAnimation != null)
+                {
+                    // SkeletonAnimation 사용
+                    skeletonAnimation.timeScale = 1f;
+                    Debug.Log($"[Cut] SkeletonAnimation timeScale을 1로 설정함");
+                    
+                    // AnimationState 초기화 (Clear)
+                    skeletonAnimation.AnimationState.ClearTracks();
+                    
+                    // 애니메이션 존재 여부 확인 후 설정
+                    string animToPlay = successAnimationName;
+                    if (skeletonAnimation.Skeleton.Data.FindAnimation(successAnimationName) == null)
+                    {
+                        Debug.LogWarning($"[Cut] '{successAnimationName}' 애니메이션을 찾을 수 없습니다. 'idle'로 대체합니다.");
+                        animToPlay = "idle";
+                    }
+                    
+                    var trackEntry = skeletonAnimation.AnimationState.SetAnimation(0, animToPlay, loopSuccessAnimation);
+                    if (trackEntry != null)
+                    {
+                        trackEntry.Loop = loopSuccessAnimation; // 명시적으로 루프 설정
+                        trackEntry.TimeScale = 1f; // TrackEntry의 timeScale도 설정
+                    }
+                    Debug.Log($"[Cut] SkeletonAnimation Success 설정 완료 - 애니메이션: '{animToPlay}', trackEntry: {trackEntry != null}, Loop: {trackEntry?.Loop}, Duration: {trackEntry?.Animation?.Duration}");
+                }
+                else if (skeletonGraphic != null)
+                {
+                    // SkeletonGraphic 사용
+                    skeletonGraphic.timeScale = 1f;
+                    Debug.Log($"[Cut] SkeletonGraphic timeScale을 1로 설정함");
+                    
+                    // AnimationState 초기화 (Clear)
+                    skeletonGraphic.AnimationState.ClearTracks();
+                    
+                    // 애니메이션 존재 여부 확인 후 설정
+                    string animToPlay = successAnimationName;
+                    if (skeletonGraphic.Skeleton.Data.FindAnimation(successAnimationName) == null)
+                    {
+                        Debug.LogWarning($"[Cut] '{successAnimationName}' 애니메이션을 찾을 수 없습니다. 'idle'로 대체합니다.");
+                        animToPlay = "idle";
+                    }
+                    
+                    var trackEntry = skeletonGraphic.AnimationState.SetAnimation(0, animToPlay, loopSuccessAnimation);
+                    if (trackEntry != null)
+                    {
+                        trackEntry.Loop = loopSuccessAnimation; // 명시적으로 루프 설정
+                        trackEntry.TimeScale = 1f; // TrackEntry의 timeScale도 설정
+                    }
+                    Debug.Log($"[Cut] SkeletonGraphic Success 설정 완료 - 애니메이션: '{animToPlay}', trackEntry: {trackEntry != null}, Loop: {trackEntry?.Loop}, Duration: {trackEntry?.Animation?.Duration}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Cut] Success 애니메이션 설정 실패: {e.Message}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[Cut] successAnimationName이 비어있습니다!");
+        }
     }
     
     private void Start()
@@ -53,18 +232,36 @@ public class Cut : MonoBehaviour
     
     private void Update()
     {
+        // GameObject가 비활성화되면 Update 중단
+        if (!gameObject.activeInHierarchy) return;
+        
         MoveCut();
+        
+        // MoveCut에서 비활성화될 수 있으므로 다시 체크
+        if (!gameObject.activeInHierarchy) return;
+        
         CheckCutLine();
-        HandleTouchInput();
+        // 터치 입력은 CutSpawner에서 중앙 관리
     }
     
-    public void Initialize(float speed, float xPosition, Action successCallback, Action missCallback)
+    public void Initialize(bool isTape,float speed, float xPosition, Action successCallback, Action missCallback)
     {
         moveSpeed = speed;
         onSuccess = successCallback;
         onMiss = missCallback;
 
-        cutLine.SetActive(true);
+        this.isTape = isTape;
+        
+        // cutLineTapePrefab이 있을 때만 활성화/비활성화
+        if (cutLineTapePrefab != null)
+        {
+            cutLineTapePrefab.SetActive(isTape);
+        }
+
+        if (cutLine != null)
+        {
+            cutLine.SetActive(true);
+        }
         
         // 화면 하단에서 시작 (X축은 랜덤)
         if (rectTransform != null)
@@ -84,6 +281,7 @@ public class Cut : MonoBehaviour
         // hasReachedCutLine = false; // 제거됨
         hasPassedCutLine = false;
         isWaitingForTouch = true; // 스폰 즉시 터치 대기 시작
+        lastClickTime = 0f; // 더블클릭 타이머 리셋
         
         // 트랜스폼 초기화
         if (rectTransform != null)
@@ -107,6 +305,17 @@ public class Cut : MonoBehaviour
                 cutLineComponent.SetWaitingState(true);
             }
         }
+        
+        // Spine 참조가 없으면 다시 찾기 (오브젝트 풀링 대응)
+        if (skeletonAnimation == null && skeletonGraphic == null)
+        {
+            skeletonAnimation = GetComponentInChildren<Spine.Unity.SkeletonAnimation>();
+            skeletonGraphic = GetComponentInChildren<Spine.Unity.SkeletonGraphic>();
+            Debug.Log($"[Cut] ResetCutState - Spine 재탐색: SkeletonAnimation={skeletonAnimation != null}, SkeletonGraphic={skeletonGraphic != null}");
+        }
+        
+        // Spine 애니메이션 다시 정지 (idle 상태로)
+        SetIdleAnimation();
         
         // 랜덤 이미지 다시 설정
         SetRandomImage();
@@ -175,67 +384,130 @@ public class Cut : MonoBehaviour
         }
     }
     
-    private void HandleTouchInput()
+    // CutSpawner에서 호출 - CutLine 범위 내에 있는지 확인
+    public bool IsInCutLineRange()
     {
-        if (!isWaitingForTouch || hasPassedCutLine) return;
+        if (!isWaitingForTouch || hasPassedCutLine) return false;
+        if (cutLineTransform == null) return false;
         
-        // 터치 또는 마우스 클릭 감지
-        if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+        float cutLineY = cutLineTransform.GetComponent<RectTransform>().anchoredPosition.y;
+        float cutY = rectTransform.anchoredPosition.y;
+        float cutTopY = cutY + (rectTransform.sizeDelta.y / 2f);
+        
+        return Mathf.Abs(cutTopY - cutLineY) <= successRange * 100f;
+    }
+    
+    // Cut의 상단 Y 좌표 반환 (정렬용)
+    public float GetCutTopY()
+    {
+        if (rectTransform == null) return float.MaxValue;
+        float cutY = rectTransform.anchoredPosition.y;
+        return cutY + (rectTransform.sizeDelta.y / 2f);
+    }
+    
+    // CutSpawner에서 호출 - 클릭 시도 (더블클릭 체크 포함)
+    public bool TryProcessClick()
+    {
+        if (!isWaitingForTouch || hasPassedCutLine) return false;
+        
+        // isTape 상태일 때는 더블클릭만 인식
+        if (isTape)
         {
-            // 컷라인 범위 체크
-            float cutLineY = cutLineTransform.GetComponent<RectTransform>().anchoredPosition.y;
-            float cutY = rectTransform.anchoredPosition.y;
-            float cutTopY = cutY + (rectTransform.sizeDelta.y / 2f);
+            float currentTime = Time.time;
+            float timeSinceLastClick = currentTime - lastClickTime;
             
-            // 컷라인 범위 내에서 터치했는지 확인
-            CutLine cutLineComponent = cutLineTransform.GetComponent<CutLine>();
-            if (Mathf.Abs(cutTopY - cutLineY) <= successRange * 100f)
+            // 더블클릭 확인
+            if (timeSinceLastClick <= doubleClickThreshold)
             {
-                // 성공 판정
-                onSuccess?.Invoke();
-                ShowSuccessEffect();
-                
-                // Cut 내부의 cutLine 게임오브젝트 비활성화
-                if (cutLine != null)
-                {
-                    cutLine.SetActive(false);
-                }
-                
-                // 컷라인 색상 변경 (성공) 및 대기 상태 해제
-                if (cutLineComponent != null)
-                {
-                    cutLineComponent.ShowSuccessFeedback();
-                    cutLineComponent.SetWaitingState(false);
-                }
+                // 더블클릭 성공 - 판정 진행
+                ProcessCutInput();
+                lastClickTime = 0f; // 더블클릭 처리 후 리셋
+                return true;
             }
             else
             {
-                // 범위 밖에서 터치 - 실패
-                onMiss?.Invoke();
-                ShowMissEffect();
-                
-                // Cut 내부의 cutLine 게임오브젝트 비활성화
-                if (cutLine != null)
-                {
-                    cutLine.SetActive(false);
-                }
-                
-                // 컷라인 색상 변경 (실패) 및 대기 상태 해제
-                if (cutLineComponent != null)
-                {
-                    cutLineComponent.ShowMissFeedback();
-                    cutLineComponent.SetWaitingState(false);
-                }
+                // 첫 번째 클릭 - 시간 저장
+                lastClickTime = currentTime;
+                return false; // 아직 처리 안됨
+            }
+        }
+        else
+        {
+            // isTape가 아니면 단일 클릭으로 판정
+            ProcessCutInput();
+            return true;
+        }
+    }
+    
+    private void ProcessCutInput()
+    {
+        // 컷라인 범위 체크
+        float cutLineY = cutLineTransform.GetComponent<RectTransform>().anchoredPosition.y;
+        float cutY = rectTransform.anchoredPosition.y;
+        float cutTopY = cutY + (rectTransform.sizeDelta.y / 2f);
+        
+        // 컷라인 범위 내에서 터치했는지 확인
+        CutLine cutLineComponent = cutLineTransform.GetComponent<CutLine>();
+        if (Mathf.Abs(cutTopY - cutLineY) <= successRange * 100f)
+        {
+            // 성공 판정
+            onSuccess?.Invoke();
+            ShowSuccessEffect();
+            
+            // Cut 내부의 cutLine 게임오브젝트 비활성화
+            if (cutLine != null)
+            {
+                cutLine.SetActive(false);
             }
             
-            hasPassedCutLine = true;
-            isWaitingForTouch = false; // 판정 후 터치 입력 비활성화
+            // Tape Prefab 비활성화 (더블클릭 성공 시)
+            if (cutLineTapePrefab != null && isTape)
+            {
+                cutLineTapePrefab.SetActive(false);
+            }
+            
+            // 컷라인 색상 변경 (성공) 및 대기 상태 해제
+            if (cutLineComponent != null)
+            {
+                cutLineComponent.ShowSuccessFeedback();
+                cutLineComponent.SetWaitingState(false);
+            }
         }
+        else
+        {
+            // 범위 밖에서 터치 - 실패
+            onMiss?.Invoke();
+            ShowMissEffect();
+            
+            // Cut 내부의 cutLine 게임오브젝트 비활성화
+            if (cutLine != null)
+            {
+                cutLine.SetActive(false);
+            }
+            
+            // Tape Prefab 비활성화 (실패 시에도)
+            if (cutLineTapePrefab != null && isTape)
+            {
+                cutLineTapePrefab.SetActive(false);
+            }
+            
+            // 컷라인 색상 변경 (실패) 및 대기 상태 해제
+            if (cutLineComponent != null)
+            {
+                cutLineComponent.ShowMissFeedback();
+                cutLineComponent.SetWaitingState(false);
+            }
+        }
+        
+        hasPassedCutLine = true;
+        isWaitingForTouch = false; // 판정 후 터치 입력 비활성화
     }
     
     
     private void ShowSuccessEffect()
     {
+        Debug.Log("[Cut] ShowSuccessEffect 호출됨!");
+        
         if (successEffect != null)
         {
             GameObject effect = Instantiate(successEffect, transform);
@@ -243,8 +515,16 @@ public class Cut : MonoBehaviour
             Destroy(effect, 2f);
         }
         
-        // 성공 애니메이션
-        StartCoroutine(SuccessAnimation());
+        // Spine 애니메이션 재생 (성공 시)
+        Debug.Log("[Cut] PlaySuccessAnimation 호출 직전");
+        PlaySuccessAnimation();
+        Debug.Log("[Cut] PlaySuccessAnimation 호출 완료");
+        
+        // 성공 애니메이션 (게임 오브젝트가 활성화 상태일 때만)
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(SuccessAnimation());
+        }
     }
     
     private void ShowMissEffect()
@@ -256,8 +536,11 @@ public class Cut : MonoBehaviour
             Destroy(effect, 2f);
         }
         
-        // 실패 애니메이션
-        StartCoroutine(MissAnimation());
+        // 실패 애니메이션 (게임 오브젝트가 활성화 상태일 때만)
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(MissAnimation());
+        }
     }
     
     private System.Collections.IEnumerator SuccessAnimation()

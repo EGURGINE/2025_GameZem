@@ -21,6 +21,7 @@ public class UIManager : Singleton<UIManager>
     public GameObject pausePanel;
     public Button pauseButton;
     public Button resumeButton;
+    public TextMeshProUGUI pauseBestScoreText;
     
     [Header("Settings UI")]
     public GameObject settingsPanel;
@@ -303,6 +304,8 @@ public class UIManager : Singleton<UIManager>
         if (pausePanel != null)
         {
             pausePanel.SetActive(true);
+
+            pauseBestScoreText.text = $"{GameManager.Instance.GetBestRecord().date}";
         }
     }
     

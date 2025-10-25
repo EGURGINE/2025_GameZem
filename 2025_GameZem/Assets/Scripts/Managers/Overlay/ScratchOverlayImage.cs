@@ -142,6 +142,7 @@ public class ScratchOverlayImage : MonoBehaviour
 
     void CollectInput()
     {
+
         if (_paused || !_active) return;
 
         if (IsPointerOverUI()) return;       // 버튼 위 터치면 지우기 무시
@@ -151,6 +152,13 @@ public class ScratchOverlayImage : MonoBehaviour
         if (Input.GetMouseButtonUp(0)) _mouseHold = false;
         if (_mouseHold) EraseAt(Input.mousePosition);
 #endif
+
+
+        Debug.Log("_mouseHold: " + _mouseHold);
+
+        Debug.Log("Input.touchCount: " + Input.touchCount);
+
+
         for (int i = 0; i < Input.touchCount; i++)
         {
             var t = Input.GetTouch(i);
@@ -173,6 +181,8 @@ public class ScratchOverlayImage : MonoBehaviour
 
     void EraseAt(Vector2 screenPos)
     {
+
+        Debug.Log("EraseAt: " + screenPos);
         RectTransform rt = (RectTransform)transform;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rt, screenPos, _eventCam, out var local))
             return;

@@ -17,7 +17,6 @@ public class GameManager : Singleton<GameManager>
     private System.DateTime startDate = new System.DateTime(2006, 9, 8);
     private System.DateTime endDate = new System.DateTime(2020, 7, 27);
     private System.DateTime currentDate;
-    private float timeSinceLastIncrease = 0f;
     private float playTIme = 0;
     
     [Header("Game Objects")]
@@ -71,7 +70,6 @@ public class GameManager : Singleton<GameManager>
         currentLives = maxLives;
         score = 0;
         currentDate = startDate;
-        timeSinceLastIncrease = 0f;
         isGameActive = true;
         isGameCleared = false;
         
@@ -82,13 +80,10 @@ public class GameManager : Singleton<GameManager>
     
     private void StartGame()
     {
-        // CutSpawner를 사용하여 컷 생성 시작
-        if (cutSpawner != null)
-        {
-            cutSpawner.ResumeSpawning();
-            playTIme = 0;
-        }
-        else
+        // 게임 시작 (타임라인 기반 시스템은 자동으로 진행됨)
+        playTIme = 0;
+        
+        if (cutSpawner == null)
         {
             Debug.LogWarning("CutSpawner not assigned! Please assign CutSpawner in GameManager.");
         }
@@ -96,19 +91,14 @@ public class GameManager : Singleton<GameManager>
     
     private void UpdateDateProgress()
     {
-        timeSinceLastIncrease += Time.deltaTime;
-
+        // 플레이 타임만 업데이트 (날짜는 CutSpawner에서 관리)
         playTIme += Time.deltaTime;
-        
-        if (timeSinceLastIncrease >= monthIncreaseInterval)
-        {
-            timeSinceLastIncrease = 0f;
-            //AddMonth();
-        }
     }
     
-    /*private void AddMonth()
+    public void AddMonth()
     {
+        if (!isGameActive || isGameCleared) return;
+        
         // 1개월 추가
         System.DateTime newDate = currentDate.AddMonths(1);
         
@@ -125,7 +115,7 @@ public class GameManager : Singleton<GameManager>
             OnDateChanged?.Invoke(currentDate);
             Debug.Log("Date increased: " + currentDate.ToString("yyyy. MM. dd"));
         }
-    }*/
+    }
     
     // CutSpawner에서 호출할 공개 메서드
     public void OnCutSuccessCallback()
@@ -158,7 +148,7 @@ public class GameManager : Singleton<GameManager>
     }
     
     
-    private void LoseLife()
+    public void LoseLife()
     {
         currentLives--;
         OnLivesChanged?.Invoke(currentLives);
@@ -173,10 +163,10 @@ public class GameManager : Singleton<GameManager>
     {
         isGameActive = false;
         
-        // CutSpawner 정지
+        // 모든 컷 제거
         if (cutSpawner != null)
         {
-            cutSpawner.StopSpawning();
+            cutSpawner.ClearAllCuts();
         }
         
         OnGameOver?.Invoke();
@@ -199,10 +189,10 @@ public class GameManager : Singleton<GameManager>
         isGameActive = false;
         isGameCleared = true;
         
-        // CutSpawner 정지
+        // 모든 컷 제거
         if (cutSpawner != null)
         {
-            cutSpawner.StopSpawning();
+            cutSpawner.ClearAllCuts();
         }
         
         OnGameCleared?.Invoke();
@@ -255,10 +245,10 @@ public class GameManager : Singleton<GameManager>
     
     public void RestartGame()
     {
-        // 기존 컷들 제거
+        // CutSpawner 리셋 (스테이지를 처음부터)
         if (cutSpawner != null)
         {
-            cutSpawner.ClearAllCuts();
+            cutSpawner.ResetStage();
         }
         
         // 게임 재시작
@@ -374,13 +364,6 @@ public class GameManager : Singleton<GameManager>
             return null;
         
         SaveData bestRecord = saveDataList[0];
-        foreach (SaveData record in saveDataList)
-        {
-            if (record.time > bestRecord.time)
-            {
-                bestRecord = record;
-            }
-        }
         
         return bestRecord;
     }
