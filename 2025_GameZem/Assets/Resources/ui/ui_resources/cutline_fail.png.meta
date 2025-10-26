@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: bd540f2a072bbc0438d7f9be47a101ed
+guid: be8140ee2809979429b4d3d285ae6b7c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4977361009918628181
-    second: popup_credit_0
+      213: 321982847965237360
+    second: cutline_fail_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: popup_credit_0
+      name: cutline_fail_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 9
         y: 0
-        width: 1004
-        height: 1833
+        width: 681
+        height: 93
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: baeabec588cdceab0800000000000000
-      internalID: -4977361009918628181
+      spriteID: 0709cbcb1b9e77400800000000000000
+      internalID: 321982847965237360
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      popup_credit_0: -4977361009918628181
+      cutline_fail_0: 321982847965237360
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

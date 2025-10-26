@@ -208,6 +208,15 @@ public class Cut : MonoBehaviour
         {
             if (cutLineTapePrefab == null)
             {
+                Debug.LogWarning("[Cut] cutLineTapePrefab이 null입니다.");
+                return;
+            }
+            
+            // 테이프 프리팹이 활성화되어 있는지 확인
+            Debug.Log($"[Cut] 테이프 프리팹 상태 확인 - activeInHierarchy: {cutLineTapePrefab.activeInHierarchy}, activeSelf: {cutLineTapePrefab.activeSelf}");
+            if (!cutLineTapePrefab.activeInHierarchy)
+            {
+                Debug.LogWarning("[Cut] cutLineTapePrefab이 비활성화 상태입니다.");
                 return;
             }
             
@@ -219,6 +228,8 @@ public class Cut : MonoBehaviour
                 tapeAnimation = cutLineTapePrefab.GetComponentInChildren<Spine.Unity.SkeletonAnimation>();
             }
             
+            Debug.Log($"[Cut] 테이프 애니메이션 초기화 - tapeGraphic: {tapeGraphic != null}, tapeAnimation: {tapeAnimation != null}");
+            
             if (tapeGraphic != null)
             {
                 // 테이프 idle 애니메이션 설정
@@ -229,10 +240,14 @@ public class Cut : MonoBehaviour
                 // 테이프 idle 애니메이션 설정
                 SetTapeIdleAnimation();
             }
+            else
+            {
+                Debug.LogWarning("[Cut] 테이프 프리팹에서 Spine 애니메이션 컴포넌트를 찾을 수 없습니다.");
+            }
         }
         catch (System.Exception e)
         {
-            // 에러 처리
+            Debug.LogError($"[Cut] 테이프 애니메이션 초기화 중 오류: {e.Message}");
         }
     }
     
@@ -246,17 +261,23 @@ public class Cut : MonoBehaviour
                 {
                     tapeGraphic.timeScale = 0f; // 정지 상태
                     var trackEntry = tapeGraphic.AnimationState.SetAnimation(0, tapeAnimationName, false);
+                    Debug.Log($"[Cut] 테이프 idle 애니메이션 설정 (Graphic): {tapeAnimationName}");
                 }
                 else if (tapeAnimation != null)
                 {
                     tapeAnimation.timeScale = 0f; // 정지 상태
                     var trackEntry = tapeAnimation.AnimationState.SetAnimation(0, tapeAnimationName, false);
+                    Debug.Log($"[Cut] 테이프 idle 애니메이션 설정 (Animation): {tapeAnimationName}");
                 }
             }
             catch (System.Exception e)
             {
-                // 에러 처리
+                Debug.LogError($"[Cut] 테이프 idle 애니메이션 설정 중 오류: {e.Message}");
             }
+        }
+        else
+        {
+            Debug.LogWarning("[Cut] tapeAnimationName이 설정되지 않았습니다.");
         }
     }
     
@@ -265,6 +286,12 @@ public class Cut : MonoBehaviour
         if (!isTape)
         {
             return;
+        }
+        
+        // 테이프 프리팹 활성화 상태 확인
+        if (cutLineTapePrefab != null)
+        {
+            Debug.Log($"[Cut] 테이프 success 애니메이션 재생 전 상태 - activeInHierarchy: {cutLineTapePrefab.activeInHierarchy}, activeSelf: {cutLineTapePrefab.activeSelf}");
         }
         
         if (!string.IsNullOrEmpty(tapeSuccessAnimationName))
@@ -276,18 +303,28 @@ public class Cut : MonoBehaviour
                     tapeGraphic.timeScale = 1f; // 정상 속도로 재생
                     tapeGraphic.AnimationState.ClearTracks();
                     var trackEntry = tapeGraphic.AnimationState.SetAnimation(0, tapeSuccessAnimationName, false);
+                    Debug.Log($"[Cut] 테이프 success 애니메이션 재생 (Graphic): {tapeSuccessAnimationName}");
                 }
                 else if (tapeAnimation != null)
                 {
                     tapeAnimation.timeScale = 1f; // 정상 속도로 재생
                     tapeAnimation.AnimationState.ClearTracks();
                     var trackEntry = tapeAnimation.AnimationState.SetAnimation(0, tapeSuccessAnimationName, false);
+                    Debug.Log($"[Cut] 테이프 success 애니메이션 재생 (Animation): {tapeSuccessAnimationName}");
+                }
+                else
+                {
+                    Debug.LogWarning("[Cut] 테이프 애니메이션 컴포넌트가 null입니다.");
                 }
             }
             catch (System.Exception e)
             {
-                // 에러 처리
+                Debug.LogError($"[Cut] 테이프 success 애니메이션 재생 중 오류: {e.Message}");
             }
+        }
+        else
+        {
+            Debug.LogWarning("[Cut] tapeSuccessAnimationName이 설정되지 않았습니다.");
         }
     }
     
@@ -437,7 +474,11 @@ public class Cut : MonoBehaviour
         {
             // 테이프 애니메이션 초기화 (isTape 상태 설정 후)
             InitializeTapeAnimation();
-            cutLineTapePrefab.SetActive(true);
+            if (cutLineTapePrefab != null)
+            {
+                cutLineTapePrefab.SetActive(true);
+                Debug.Log($"[Cut] 테이프 프리팹 활성화 - isActive: {cutLineTapePrefab.activeInHierarchy}, isActiveSelf: {cutLineTapePrefab.activeSelf}");
+            }
         }
         
         // 화면 하단에서 시작 (X축은 랜덤, 화면 밖으로 나가지 않도록 제한)
@@ -482,6 +523,12 @@ public class Cut : MonoBehaviour
             cutLine.SetActive(true);
         }
         
+        // 테이프 프리팹 상태 초기화 (재사용을 위해)
+        if (cutLineTapePrefab != null)
+        {
+            cutLineTapePrefab.SetActive(false); // 초기에는 비활성화
+        }
+        
         // 컷라인 RectTransform 다시 캐싱 (오브젝트 풀링 대응)
         if (cutLineTransform != null && cutLineRectTransform == null)
         {
@@ -512,8 +559,9 @@ public class Cut : MonoBehaviour
         // Spine 애니메이션 다시 정지 (idle 상태로)
         SetIdleAnimation();
         
-        // 테이프 애니메이션 다시 초기화
-        InitializeTapeAnimation();
+        // 테이프 애니메이션 컴포넌트 리셋
+        tapeGraphic = null;
+        tapeAnimation = null;
         
         // 랜덤 이미지 다시 설정
         SetRandomImage();
@@ -683,11 +731,11 @@ public class Cut : MonoBehaviour
                 cutLine.SetActive(false);
             }
             
-            // Tape Prefab 비활성화 (더블클릭 성공 시)
+            // Tape Prefab은 성공 애니메이션 후에 비활성화 (애니메이션 완료 후 처리)
             if (cutLineTapePrefab != null && isTape)
             {
-                //cutLineTapePrefab.SetActive(false);
-                
+                // 성공 애니메이션이 완료된 후 비활성화하도록 코루틴으로 처리
+                StartCoroutine(DisableTapeAfterAnimation());
             }
             
             // 테이프 스파인 애니메이션 재생 (isTape 상태일 때)
@@ -720,10 +768,11 @@ public class Cut : MonoBehaviour
                 cutLine.SetActive(false);
             }
             
-            // Tape Prefab 비활성화 (실패 시에도)
+            // Tape Prefab 비활성화 (실패 시 즉시 비활성화)
             if (cutLineTapePrefab != null && isTape)
             {
                 cutLineTapePrefab.SetActive(false);
+                Debug.Log("[Cut] 실패 시 테이프 프리팹 비활성화");
             }
             
             // 컷라인 색상 변경 (실패) 및 대기 상태 해제
@@ -869,5 +918,21 @@ public class Cut : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         PlayTapeSuccessAnimation();
+    }
+    
+    /// <summary>
+    /// 테이프 애니메이션 완료 후 테이프 프리팹을 비활성화하는 코루틴
+    /// </summary>
+    private System.Collections.IEnumerator DisableTapeAfterAnimation()
+    {
+        // 애니메이션 재생 시간 대기 (disappear 애니메이션 길이에 따라 조정)
+        yield return new WaitForSeconds(1f);
+        
+        if (cutLineTapePrefab != null)
+        {
+            Debug.Log($"[Cut] 테이프 비활성화 전 상태 - activeInHierarchy: {cutLineTapePrefab.activeInHierarchy}, activeSelf: {cutLineTapePrefab.activeSelf}");
+            cutLineTapePrefab.SetActive(false);
+            Debug.Log($"[Cut] 테이프 애니메이션 완료 후 프리팹 비활성화 - activeInHierarchy: {cutLineTapePrefab.activeInHierarchy}, activeSelf: {cutLineTapePrefab.activeSelf}");
+        }
     }
 }

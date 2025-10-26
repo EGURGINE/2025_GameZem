@@ -2827,8 +2827,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 325, y: -250}
-  m_SizeDelta: {x: 650, y: 40}
+  m_AnchoredPosition: {x: 340.5, y: -250}
+  m_SizeDelta: {x: 681, y: 93}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1199972200
 MonoBehaviour:
@@ -2843,14 +2843,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: -8366512714024090503, guid: c62206001ea39c34da03d9680b897a1f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2880,10 +2880,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1219722da91fe4b4dbaa6bee515ebc4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineColor: {r: 1, g: 1, b: 0, a: 1}
-  waitingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  successColor: {r: 0, g: 1, b: 0, a: 1}
-  missColor: {r: 1, g: 0, b: 0, a: 1}
+  lineSprite: {fileID: -8366512714024090503, guid: c62206001ea39c34da03d9680b897a1f, type: 3}
+  successSprite: {fileID: -8366512714024090503, guid: c62206001ea39c34da03d9680b897a1f, type: 3}
+  missSprite: {fileID: 321982847965237360, guid: be8140ee2809979429b4d3d285ae6b7c, type: 3}
+  waitingColor: {r: 1, g: 1, b: 1, a: 1}
+  successColor: {r: 1, g: 1, b: 1, a: 1}
+  missColor: {r: 1, g: 1, b: 1, a: 1}
+  lineColor: {r: 1, g: 1, b: 1, a: 1}
   lineThickness: 30
   pulseSpeed: 10
   colorChangeDuration: 0.3
