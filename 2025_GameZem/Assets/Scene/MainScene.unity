@@ -422,7 +422,67 @@ MonoBehaviour:
   maxSpawnInterval: 0.5
   speedIncreaseRate: 0.05
   poolSize: 10
-  sequenceData: []
+  sequenceData:
+  - order: 1
+    mainType: 0
+  - order: 2
+    mainType: 0
+  - order: 3
+    mainType: 0
+  - order: 4
+    mainType: 1
+  - order: 5
+    mainType: 0
+  - order: 6
+    mainType: 0
+  - order: 7
+    mainType: 0
+  - order: 8
+    mainType: 2
+  - order: 9
+    mainType: 0
+  - order: 10
+    mainType: 2
+  - order: 11
+    mainType: 0
+  - order: 12
+    mainType: 1
+  - order: 13
+    mainType: 0
+  - order: 14
+    mainType: 0
+  - order: 15
+    mainType: 4
+  - order: 16
+    mainType: 0
+  - order: 17
+    mainType: 1
+  - order: 18
+    mainType: 0
+  - order: 19
+    mainType: 0
+  - order: 20
+    mainType: 0
+  - order: 21
+    mainType: 2
+  - order: 22
+    mainType: 0
+  - order: 23
+    mainType: 5
+  - order: 24
+    mainType: 0
+  - order: 25
+    mainType: 2
+  - order: 26
+    mainType: 0
+  - order: 27
+    mainType: 0
+  - order: 28
+    mainType: 0
+  - order: 29
+    mainType: 2
+  - order: 30
+    mainType: 0
   currentSequenceIndex: 0
   currentMonth: 5
   targetMonth: 7

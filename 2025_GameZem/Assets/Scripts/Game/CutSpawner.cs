@@ -448,10 +448,16 @@ public class CutSpawner : MonoBehaviour
         {
             return;
         }
+
+        var isRanPos = (type == ObstacleType.JoulDoodle) ||
+         (type == ObstacleType.SenseisenFoot) || 
+         (type == ObstacleType.EditorPressure);
+         
+
         
         // 위치 계산 (랜덤 or 고정)
         Vector2 spawnPosition;
-        if (randomPosition)
+        if (!isRanPos)
         {
             // 랜덤 위치
             float randomX = Random.Range(-300f, 300f);
@@ -460,8 +466,22 @@ public class CutSpawner : MonoBehaviour
         }
         else
         {
-            // 고정 위치 (화면 중앙 또는 특정 위치)
-            spawnPosition = Vector2.zero;
+            switch (type)
+            {
+                case ObstacleType.JoulDoodle:
+                    spawnPosition = new Vector2(0, 0);
+                    break;
+                case ObstacleType.SenseisenFoot:
+                    spawnPosition = new Vector2(0,-1200f);
+                    break;
+                case ObstacleType.EditorPressure:
+                    spawnPosition = new Vector2(0, 0);
+                    break;
+                default:
+                    spawnPosition = new Vector2(0, 0);
+                    break;
+            }   
+
         }
         
         // ObstacleManager를 통해 스폰 (테이프일 경우 자동으로 nextCutHasTape 플래그 설정됨)

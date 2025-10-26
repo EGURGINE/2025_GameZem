@@ -69,7 +69,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &6256395615153968956
 RectTransform:
   m_ObjectHideFlags: 0
@@ -87,7 +87,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 351, y: -1232}
+  m_AnchoredPosition: {x: 351, y: -2464}
   m_SizeDelta: {x: 500, y: 1000}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &3919570910626778525
@@ -201,7 +201,7 @@ MonoBehaviour:
   initialFlipX: 0
   initialFlipY: 0
   startingAnimation: appear
-  startingLoop: 1
+  startingLoop: 0
   timeScale: 1
   freeze: 0
   layoutScaleMode: 0

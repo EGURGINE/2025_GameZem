@@ -433,8 +433,12 @@ public class Cut : MonoBehaviour
             cutLine.SetActive(!isTape);
         }
         
-        // 테이프 애니메이션 초기화 (isTape 상태 설정 후)
-        InitializeTapeAnimation();
+        if(this.isTape)
+        {
+            // 테이프 애니메이션 초기화 (isTape 상태 설정 후)
+            InitializeTapeAnimation();
+            cutLineTapePrefab.SetActive(true);
+        }
         
         // 화면 하단에서 시작 (X축은 랜덤, 화면 밖으로 나가지 않도록 제한)
         if (rectTransform != null)
