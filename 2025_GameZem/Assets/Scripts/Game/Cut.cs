@@ -212,13 +212,9 @@ public class Cut : MonoBehaviour
                 return;
             }
             
-            // 테이프 프리팹이 활성화되어 있는지 확인
+            // 테이프 프리팹이 활성화되어 있는지 확인 (비활성화 상태여도 초기화 진행)
             Debug.Log($"[Cut] 테이프 프리팹 상태 확인 - activeInHierarchy: {cutLineTapePrefab.activeInHierarchy}, activeSelf: {cutLineTapePrefab.activeSelf}");
-            if (!cutLineTapePrefab.activeInHierarchy)
-            {
-                Debug.LogWarning("[Cut] cutLineTapePrefab이 비활성화 상태입니다.");
-                return;
-            }
+            // 비활성화 상태여도 초기화는 진행 (나중에 활성화될 때 사용하기 위해)
             
             // SkeletonGraphic 우선 검색
             tapeGraphic = cutLineTapePrefab.GetComponentInChildren<Spine.Unity.SkeletonGraphic>();
@@ -232,11 +228,43 @@ public class Cut : MonoBehaviour
             
             if (tapeGraphic != null)
             {
+                // 초기 색상 설정 (투명도 문제 해결)
+                tapeGraphic.color = Color.white;
+                tapeGraphic.Skeleton.SetColor(Color.white);
+                
+                // 추가 설정들
+                tapeGraphic.enabled = true;
+                tapeGraphic.gameObject.SetActive(true);
+                
+                // 스케일 설정 (크기 문제 해결)
+                tapeGraphic.transform.localScale = Vector3.one;
+                
+                // 초기 상태 확인
+                Debug.Log($"[Cut] 테이프 초기화 Graphic 상태 - enabled: {tapeGraphic.enabled}, gameObject.active: {tapeGraphic.gameObject.activeInHierarchy}");
+                Debug.Log($"[Cut] 테이프 초기화 Graphic 색상 - color: {tapeGraphic.color}, skeleton color: {tapeGraphic.Skeleton.A}");
+                Debug.Log($"[Cut] 테이프 초기화 Graphic 위치 - position: {tapeGraphic.transform.position}, localPosition: {tapeGraphic.transform.localPosition}");
+                Debug.Log($"[Cut] 테이프 초기화 Graphic 스케일 - scale: {tapeGraphic.transform.localScale}");
+                
                 // 테이프 idle 애니메이션 설정
                 SetTapeIdleAnimation();
             }
             else if (tapeAnimation != null)
             {
+                // 초기 색상 설정 (투명도 문제 해결)
+                tapeAnimation.skeleton.SetColor(Color.white);
+                
+                // 추가 설정들
+                tapeAnimation.enabled = true;
+                tapeAnimation.gameObject.SetActive(true);
+                
+                // 스케일 설정 (크기 문제 해결)
+                tapeAnimation.transform.localScale = Vector3.one;
+                
+                // 초기 상태 확인
+                Debug.Log($"[Cut] 테이프 초기화 Animation 상태 - enabled: {tapeAnimation.enabled}, gameObject.active: {tapeAnimation.gameObject.activeInHierarchy}");
+                Debug.Log($"[Cut] 테이프 초기화 Animation 색상 - skeleton color: {tapeAnimation.skeleton.A}");
+                Debug.Log($"[Cut] 테이프 초기화 Animation 스케일 - scale: {tapeAnimation.transform.localScale}");
+                
                 // 테이프 idle 애니메이션 설정
                 SetTapeIdleAnimation();
             }
@@ -257,17 +285,62 @@ public class Cut : MonoBehaviour
         {
             try
             {
+                // 테이프 프리팹이 활성화되어 있을 때만 애니메이션 설정
+                if (cutLineTapePrefab != null && !cutLineTapePrefab.activeInHierarchy)
+                {
+                    Debug.Log("[Cut] 테이프 프리팹이 비활성화 상태이므로 idle 애니메이션 설정을 건너뜁니다.");
+                    return;
+                }
+                
                 if (tapeGraphic != null)
                 {
-                    tapeGraphic.timeScale = 0f; // 정지 상태
-                    var trackEntry = tapeGraphic.AnimationState.SetAnimation(0, tapeAnimationName, false);
-                    Debug.Log($"[Cut] 테이프 idle 애니메이션 설정 (Graphic): {tapeAnimationName}");
+                    tapeGraphic.timeScale = 1f; // 정상 속도로 재생 (idle 애니메이션을 보이게 하기 위해)
+                    // 색상 및 알파값 설정 (투명도 문제 해결)
+                    tapeGraphic.color = Color.white;
+                    tapeGraphic.Skeleton.SetColor(Color.white);
+                    
+                    // 추가 설정들
+                    tapeGraphic.enabled = true;
+                    tapeGraphic.gameObject.SetActive(true);
+                    
+                    // 스케일 설정 (크기 문제 해결)
+                    tapeGraphic.transform.localScale = Vector3.one;
+                    
+                    // 애니메이션 상태 확인
+                    Debug.Log($"[Cut] 테이프 Graphic 상태 - enabled: {tapeGraphic.enabled}, gameObject.active: {tapeGraphic.gameObject.activeInHierarchy}");
+                    Debug.Log($"[Cut] 테이프 Graphic 색상 - color: {tapeGraphic.color}, skeleton color: {tapeGraphic.Skeleton.A}");
+                    Debug.Log($"[Cut] 테이프 Graphic 스케일 - scale: {tapeGraphic.transform.localScale}");
+                    
+                    // idle 애니메이션을 루프로 설정하여 계속 보이게 함
+                    var trackEntry = tapeGraphic.AnimationState.SetAnimation(0, tapeAnimationName, true);
+                    if (trackEntry != null)
+                    {
+                        trackEntry.Loop = true; // 명시적으로 루프 설정
+                        trackEntry.TimeScale = 1f; // 정상 속도
+                    }
+                    Debug.Log($"[Cut] 테이프 idle 애니메이션 설정 (Graphic): {tapeAnimationName}, trackEntry: {trackEntry != null}, loop: true");
                 }
                 else if (tapeAnimation != null)
                 {
-                    tapeAnimation.timeScale = 0f; // 정지 상태
-                    var trackEntry = tapeAnimation.AnimationState.SetAnimation(0, tapeAnimationName, false);
-                    Debug.Log($"[Cut] 테이프 idle 애니메이션 설정 (Animation): {tapeAnimationName}");
+                    tapeAnimation.timeScale = 1f; // 정상 속도로 재생 (idle 애니메이션을 보이게 하기 위해)
+                    // 색상 및 알파값 설정 (투명도 문제 해결)
+                    tapeAnimation.skeleton.SetColor(Color.white);
+                    
+                    // 추가 설정들
+                    tapeAnimation.enabled = true;
+                    tapeAnimation.gameObject.SetActive(true);
+                    
+                    // 스케일 설정 (크기 문제 해결)
+                    tapeAnimation.transform.localScale = Vector3.one;
+                    
+                    // idle 애니메이션을 루프로 설정하여 계속 보이게 함
+                    var trackEntry = tapeAnimation.AnimationState.SetAnimation(0, tapeAnimationName, true);
+                    if (trackEntry != null)
+                    {
+                        trackEntry.Loop = true; // 명시적으로 루프 설정
+                        trackEntry.TimeScale = 1f; // 정상 속도
+                    }
+                    Debug.Log($"[Cut] 테이프 idle 애니메이션 설정 (Animation): {tapeAnimationName}, trackEntry: {trackEntry != null}, loop: true");
                 }
             }
             catch (System.Exception e)
@@ -301,15 +374,45 @@ public class Cut : MonoBehaviour
                 if (tapeGraphic != null)
                 {
                     tapeGraphic.timeScale = 1f; // 정상 속도로 재생
+                    // 색상 및 알파값 설정 (투명도 문제 해결)
+                    tapeGraphic.color = Color.white;
+                    tapeGraphic.Skeleton.SetColor(Color.white);
+                    
+                    // 추가 설정들
+                    tapeGraphic.enabled = true;
+                    tapeGraphic.gameObject.SetActive(true);
+                    
+                    // 스케일 설정 (크기 문제 해결)
+                    tapeGraphic.transform.localScale = Vector3.one;
+                    
+                    // 애니메이션 상태 확인
+                    Debug.Log($"[Cut] 테이프 Success Graphic 상태 - enabled: {tapeGraphic.enabled}, gameObject.active: {tapeGraphic.gameObject.activeInHierarchy}");
+                    Debug.Log($"[Cut] 테이프 Success Graphic 색상 - color: {tapeGraphic.color}, skeleton color: {tapeGraphic.Skeleton.A}");
+                    Debug.Log($"[Cut] 테이프 Success Graphic 스케일 - scale: {tapeGraphic.transform.localScale}");
+                    
                     tapeGraphic.AnimationState.ClearTracks();
+                    // 애니메이션을 처음부터 다시 시작하도록 설정
                     var trackEntry = tapeGraphic.AnimationState.SetAnimation(0, tapeSuccessAnimationName, false);
-                    Debug.Log($"[Cut] 테이프 success 애니메이션 재생 (Graphic): {tapeSuccessAnimationName}");
+                    if (trackEntry != null)
+                    {
+                        trackEntry.TrackTime = 0f; // 애니메이션 시간을 처음으로 리셋
+                        trackEntry.AnimationStart = 0f; // 애니메이션 시작 시간 리셋
+                    }
+                    Debug.Log($"[Cut] 테이프 success 애니메이션 재생 (Graphic): {tapeSuccessAnimationName}, trackEntry: {trackEntry != null}");
                 }
                 else if (tapeAnimation != null)
                 {
                     tapeAnimation.timeScale = 1f; // 정상 속도로 재생
+                    // 색상 및 알파값 설정 (투명도 문제 해결)
+                    tapeAnimation.skeleton.SetColor(Color.white);
                     tapeAnimation.AnimationState.ClearTracks();
+                    // 애니메이션을 처음부터 다시 시작하도록 설정
                     var trackEntry = tapeAnimation.AnimationState.SetAnimation(0, tapeSuccessAnimationName, false);
+                    if (trackEntry != null)
+                    {
+                        trackEntry.TrackTime = 0f; // 애니메이션 시간을 처음으로 리셋
+                        trackEntry.AnimationStart = 0f; // 애니메이션 시작 시간 리셋
+                    }
                     Debug.Log($"[Cut] 테이프 success 애니메이션 재생 (Animation): {tapeSuccessAnimationName}");
                 }
                 else
@@ -478,6 +581,9 @@ public class Cut : MonoBehaviour
             {
                 cutLineTapePrefab.SetActive(true);
                 Debug.Log($"[Cut] 테이프 프리팹 활성화 - isActive: {cutLineTapePrefab.activeInHierarchy}, isActiveSelf: {cutLineTapePrefab.activeSelf}");
+                
+                // 테이프 프리팹 활성화 후 idle 애니메이션 설정
+                SetTapeIdleAnimation();
             }
         }
         
@@ -559,9 +665,9 @@ public class Cut : MonoBehaviour
         // Spine 애니메이션 다시 정지 (idle 상태로)
         SetIdleAnimation();
         
-        // 테이프 애니메이션 컴포넌트 리셋
-        tapeGraphic = null;
-        tapeAnimation = null;
+        // 테이프 애니메이션 컴포넌트는 null로 리셋하지 않음 (재사용을 위해 유지)
+        // tapeGraphic = null;
+        // tapeAnimation = null;
         
         // 랜덤 이미지 다시 설정
         SetRandomImage();

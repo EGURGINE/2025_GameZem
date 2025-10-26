@@ -19,7 +19,7 @@ public class CutSpawner : MonoBehaviour
     
     [Header("Cut Speed Settings")]
     public float baseCutSpeed = 20f; // 기본 컷 속도
-    public float normalSpeedCap = 2.5f; // 일반 상황 속도 상한선 (배수)
+    public float normalSpeedCap = 3.5f; // 일반 상황 속도 상한선 (배수)
     public float editorPressureSpeedCap = 4.0f; // 편집자 독촉 시 속도 상한선 (배수)
     
     [Header("Difficulty Settings")]
@@ -258,13 +258,13 @@ public class CutSpawner : MonoBehaviour
             sequenceData.Add(new SequenceData(9, SpawnType.Cut, null)); // 순서 9: Cut
             sequenceData.Add(new SequenceData(10, SpawnType.CutLineTape, null)); // 순서 10: CutLineTape
             sequenceData.Add(new SequenceData(11, SpawnType.Cut, null)); // 순서 11: Cut
-            sequenceData.Add(new SequenceData(12, SpawnType.ThrowingObjects, null)); // 순서 12: ThrowingObjects
-            sequenceData.Add(new SequenceData(13, SpawnType.Cut, null)); // 순서 13: Cut
+            sequenceData.Add(new SequenceData(12, SpawnType.JoulDoodle, null)); // 순서 12: ThrowingObjects
+            sequenceData.Add(new SequenceData(13, SpawnType.Cut, SpawnType.EditorPressure)); // 순서 13: Cut + EditorPressure
             sequenceData.Add(new SequenceData(14, SpawnType.Cut, null)); // 순서 14: Cut
             sequenceData.Add(new SequenceData(15, SpawnType.SenseisenFoot, null)); // 순서 15: SenseisenFoot
             sequenceData.Add(new SequenceData(16, SpawnType.Cut, null)); // 순서 16: Cut
             sequenceData.Add(new SequenceData(17, SpawnType.ThrowingObjects, null)); // 순서 17: ThrowingObjects
-            sequenceData.Add(new SequenceData(18, SpawnType.Cut, null)); // 순서 18: Cut
+            sequenceData.Add(new SequenceData(18, SpawnType.Cut, SpawnType.EditorPressure)); // 순서 18: Cut + EditorPressure
             sequenceData.Add(new SequenceData(19, SpawnType.Cut, SpawnType.SpeechBubbleOverlay)); // 순서 19: Cut + SpeechBubbleOverlay
             sequenceData.Add(new SequenceData(20, SpawnType.Cut, null)); // 순서 20: Cut
             sequenceData.Add(new SequenceData(21, SpawnType.CutLineTape, null)); // 순서 21: CutLineTape
